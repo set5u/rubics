@@ -59,7 +59,7 @@ class Face {
   editedIndexes: number[] = []
   rotate: 0 | 1 | 2 | 3 = 0
   ctx: CanvasRenderingContext2D
-  constructor(public canvas: HTMLCanvasElement, public size: number, initialColor: Color) {
+  constructor(public canvas: HTMLCanvasElement, public splits: HTMLCanvasElement[], public size: number, initialColor: Color) {
     this.data = Array<number>(size ** 2).fill(initialColor)
     this.ctx = canvas.getContext("2d")!
     this.ctx.fillStyle = i2color[initialColor]
@@ -108,14 +108,14 @@ class Cube {
   back: Face
   top: Face
   bottom: Face
-  constructor(canvases: HTMLCanvasElement[], size: number) {
+  constructor(canvases: HTMLCanvasElement[], splits: HTMLCanvasElement[], size: number) {
     canvases.forEach((c) => { c.width = Math.max(size, 1024); c.height = Math.max(size, 1024) })
-    this.front = new Face(canvases[0], size, Color.R)
-    this.right = new Face(canvases[1], size, Color.G)
-    this.left = new Face(canvases[2], size, Color.B)
-    this.back = new Face(canvases[3], size, Color.O)
-    this.top = new Face(canvases[4], size, Color.Y)
-    this.bottom = new Face(canvases[5], size, Color.W)
+    this.front = new Face(canvases[0], splits.slice(0, 3), size, Color.R)
+    this.right = new Face(canvases[1], splits.slice(3, 6), size, Color.G)
+    this.left = new Face(canvases[2], splits.slice(6, 9), size, Color.B)
+    this.back = new Face(canvases[3], splits.slice(9, 12), size, Color.O)
+    this.top = new Face(canvases[4], splits.slice(12, 15), size, Color.Y)
+    this.bottom = new Face(canvases[5], splits.slice(15, 18), size, Color.W)
   }
 }
 const front = ref<HTMLCanvasElement>()
@@ -143,8 +143,46 @@ const y0Show = ref(false)
 const y1Show = ref(false)
 const z0Show = ref(false)
 const z1Show = ref(false)
+
+const topSplit0 = ref<HTMLCanvasElement>()
+const topSplit1 = ref<HTMLCanvasElement>()
+const topSplit2 = ref<HTMLCanvasElement>()
+const bottomSplit0 = ref<HTMLCanvasElement>()
+const bottomSplit1 = ref<HTMLCanvasElement>()
+const bottomSplit2 = ref<HTMLCanvasElement>()
+const frontSplit0 = ref<HTMLCanvasElement>()
+const frontSplit1 = ref<HTMLCanvasElement>()
+const frontSplit2 = ref<HTMLCanvasElement>()
+const rightSplit0 = ref<HTMLCanvasElement>()
+const rightSplit1 = ref<HTMLCanvasElement>()
+const rightSplit2 = ref<HTMLCanvasElement>()
+const backSplit0 = ref<HTMLCanvasElement>()
+const backSplit1 = ref<HTMLCanvasElement>()
+const backSplit2 = ref<HTMLCanvasElement>()
+const leftSplit0 = ref<HTMLCanvasElement>()
+const leftSplit1 = ref<HTMLCanvasElement>()
+const leftSplit2 = ref<HTMLCanvasElement>()
 onMounted(() => {
-  const cube = new Cube([front.value!, right.value!, left.value!, back.value!, top.value!, bottom.value!], 5)
+  const cube = new Cube([front.value!, right.value!, left.value!, back.value!, top.value!, bottom.value!,], [
+    topSplit0.value!,
+    topSplit1.value!,
+    topSplit2.value!,
+    bottomSplit0.value!,
+    bottomSplit1.value!,
+    bottomSplit2.value!,
+    frontSplit0.value!,
+    frontSplit1.value!,
+    frontSplit2.value!,
+    rightSplit0.value!,
+    rightSplit1.value!,
+    rightSplit2.value!,
+    backSplit0.value!,
+    backSplit1.value!,
+    backSplit2.value!,
+    leftSplit0.value!,
+    leftSplit1.value!,
+    leftSplit2.value!,
+  ], 5)
 })
 </script>
 <style scoped lang="scss">
