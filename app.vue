@@ -67,6 +67,9 @@ class Face {
   editedIndexes: number[] = [];
   rotate: 0 | 1 | 2 | 3 = 0;
   ctx: CanvasRenderingContext2D;
+  ctx0: CanvasRenderingContext2D
+  ctx1: CanvasRenderingContext2D
+  ctx2: CanvasRenderingContext2D
   constructor(
     public canvas: HTMLCanvasElement,
     public splits: HTMLCanvasElement[],
@@ -77,6 +80,10 @@ class Face {
     this.ctx = canvas.getContext("2d")!;
     this.ctx.fillStyle = i2color[initialColor];
     this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+    this.ctx0 = splits[0].getContext("2d")!
+    this.ctx1 = splits[0].getContext("2d")!
+    this.ctx2 = splits[0].getContext("2d")!
+    this.render(1, 1)
   }
   getIndexAt(x: number, y: number) {
     switch (this.rotate) {
@@ -118,6 +125,7 @@ class Face {
       pixelSize,
     );
   }
+  render(offset0: number, offset1: number) { }
 }
 class Cube {
   front: Face;
@@ -325,9 +333,6 @@ onMounted(() => {
   pointer-events: none;
 }
 
-.face>* {
-  pointer-events: all;
-}
 
 .base {
   transform: rotateX(calc(90deg * var(--i))) translateZ(25vmin);
@@ -363,6 +368,7 @@ onMounted(() => {
 
 .split {
   position: absolute;
+  pointer-events: all;
 }
 
 .middle {
