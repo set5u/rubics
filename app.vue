@@ -83,7 +83,7 @@ class Face {
     this.ctx0 = splits[0].getContext("2d")!
     this.ctx1 = splits[0].getContext("2d")!
     this.ctx2 = splits[0].getContext("2d")!
-    this.render(1, 1)
+    this.render(1, 1, "X")
   }
   getIndexAt(x: number, y: number) {
     switch (this.rotate) {
@@ -125,7 +125,7 @@ class Face {
       pixelSize,
     );
   }
-  render(offset0: number, offset1: number) { }
+  render(offset0: number, offset1: number, axis: "X" | "Y") { }
 }
 class Cube {
   front: Face;
