@@ -151,11 +151,11 @@ const top = ref<HTMLCanvasElement>();
 const bottom = ref<HTMLCanvasElement>();
 
 const x0Offset = ref(.7);
-const x1Offset = ref(1);
+const x1Offset = ref(.8);
 const y0Offset = ref(1);
 const y1Offset = ref(1);
 const z0Offset = ref(.6);
-const z1Offset = ref(1);
+const z1Offset = ref(.5);
 const x0OffsetVMmin = computed(() => (x0Offset.value - .001) * 25 + "vmin");
 const x1OffsetVMmin = computed(() => (x1Offset.value - .001) * 25 + "vmin");
 const y0OffsetVMmin = computed(() => (y0Offset.value - .001) * 25 + "vmin");
@@ -182,6 +182,12 @@ const frontZRot = computed(() => x0Offset.value === 1 ? xRot.value + "deg" : "0d
 const rightZRot = computed(() => z0Offset.value === 1 ? zRot.value + "deg" : "0deg")
 const backZRot = computed(() => x1Offset.value === 1 ? -xRot.value + "deg" : "0deg")
 const leftZRot = computed(() => z1Offset.value === 1 ? -zRot.value + "deg" : "0deg")
+const topTop = computed(() => (1 - x0Offset.value) * 25 + "vmin")
+const topBottom = computed(() => (1 - x1Offset.value) * 25 + "vmin")
+const topLeft = computed(() => (1 - z0Offset.value) * 25 + "vmin")
+const topRight = computed(() => (1 - z1Offset.value) * 25 + "vmin")
+const topWidth = computed(() => (z0Offset.value + z1Offset.value) * 25 + "vmin")
+const topHeight = computed(() => (x0Offset.value + x1Offset.value) * 25 + "vmin")
 const topSplit0 = ref<HTMLCanvasElement>();
 const topSplit1 = ref<HTMLCanvasElement>();
 const topSplit2 = ref<HTMLCanvasElement>();
@@ -290,6 +296,7 @@ onMounted(() => {
 
 .split {
   background-color: green;
+  position: absolute;
 }
 
 .frame {
@@ -300,6 +307,27 @@ onMounted(() => {
 
 .top {
   transform: rotate(v-bind(topZRot))
+}
+
+.top0 {
+  top: 0;
+  left: 0;
+  width: v-bind(topLeft);
+  height: v-bind(topTop);
+}
+
+.top1 {
+  top: v-bind(topTop);
+  left: v-bind(topLeft);
+  width: v-bind(topWidth);
+  height: v-bind(topHeight)
+}
+
+.top2 {
+  bottom: 0;
+  right: 0;
+  width: v-bind(topRight);
+  height: v-bind(topBottom)
 }
 
 .bottom {
