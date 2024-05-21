@@ -169,7 +169,7 @@ const zShow = computed(() => rotAxis.value === 3);
 const xRot = ref(0)
 const yRot = ref(0)
 const zRot = ref(0)
-setInterval(() => xRot.value = (xRot.value + 10) % 360, 160)
+setInterval(() => zRot.value = (zRot.value + 10) % 360, 160)
 const xRotDeg = computed(() => xRot.value + "deg")
 const yRotDeg = computed(() => yRot.value + "deg")
 const zRotDeg = computed(() => zRot.value + "deg")
@@ -194,6 +194,12 @@ const frontLeft = computed(() => (1 - z1Offset.value) * 25 + "vmin")
 const frontRight = computed(() => (1 - z0Offset.value) * 25 + "vmin")
 const frontWidth = computed(() => (z0Offset.value + z1Offset.value) * 25 + "vmin")
 const frontHeight = computed(() => (y0Offset.value + y1Offset.value) * 25 + "vmin")
+const rightTop = computed(() => (1 - y0Offset.value) * 25 + "vmin")
+const rightBottom = computed(() => (1 - y1Offset.value) * 25 + "vmin")
+const rightLeft = computed(() => (1 - x0Offset.value) * 25 + "vmin")
+const rightRight = computed(() => (1 - x1Offset.value) * 25 + "vmin")
+const rightWidth = computed(() => (x0Offset.value + x1Offset.value) * 25 + "vmin")
+const rightHeight = computed(() => (y0Offset.value + y1Offset.value) * 25 + "vmin")
 const topSplit0 = ref<HTMLCanvasElement>();
 const topSplit1 = ref<HTMLCanvasElement>();
 const topSplit2 = ref<HTMLCanvasElement>();
@@ -391,6 +397,27 @@ onMounted(() => {
   transform: rotate(v-bind(rightZRot))
 }
 
+.right0 {
+  top: 0;
+  left: 0;
+  width: v-bind(rightLeft);
+  height: v-bind(rightTop);
+}
+
+.right1 {
+  top: v-bind(rightTop);
+  left: v-bind(rightLeft);
+  width: v-bind(rightWidth);
+  height: v-bind(rightHeight)
+}
+
+.right2 {
+  bottom: 0;
+  right: 0;
+  width: v-bind(rightRight);
+  height: v-bind(rightBottom)
+}
+
 .back {
   transform: rotate(v-bind(backZRot))
 }
@@ -418,6 +445,27 @@ onMounted(() => {
 
 .left {
   transform: rotate(v-bind(leftZRot))
+}
+
+.left0 {
+  top: 0;
+  right: 0;
+  width: v-bind(rightLeft);
+  height: v-bind(rightTop);
+}
+
+.left1 {
+  top: v-bind(rightTop);
+  right: v-bind(rightLeft);
+  width: v-bind(rightWidth);
+  height: v-bind(rightHeight)
+}
+
+.left2 {
+  bottom: 0;
+  left: 0;
+  width: v-bind(rightRight);
+  height: v-bind(rightBottom)
 }
 </style>
 <style lang="scss">
