@@ -129,6 +129,14 @@ class Cube {
   constructor(
     canvases: HTMLCanvasElement[],
     splits: HTMLCanvasElement[],
+    public offsets: {
+      x0Offset: Ref<number>;
+      x1Offset: Ref<number>;
+      y0Offset: Ref<number>;
+      y1Offset: Ref<number>;
+      z0Offset: Ref<number>;
+      z1Offset: Ref<number>;
+    },
     size: number,
   ) {
     canvases.forEach((c) => {
@@ -290,6 +298,7 @@ onMounted(() => {
       leftSplit1.value!,
       leftSplit2.value!,
     ],
+    { x0Offset, x1Offset, y0Offset, y1Offset, z0Offset, z1Offset },
     5,
   );
 });
@@ -354,7 +363,6 @@ onMounted(() => {
 
 .split {
   position: absolute;
-
 }
 
 .middle {
@@ -435,7 +443,9 @@ onMounted(() => {
   left: v-bind(frontLeft);
   width: v-bind(frontWidth);
   height: v-bind(frontHeight);
-  transform: translate3d(v-bind(leftRotOffset), v-bind(bottomRotOffset), -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(topRotOffset), -25vmin);
+  transform: translate3d(v-bind(leftRotOffset),
+      v-bind(bottomRotOffset),
+      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .front2 {
@@ -461,7 +471,9 @@ onMounted(() => {
   left: v-bind(rightLeft);
   width: v-bind(rightWidth);
   height: v-bind(rightHeight);
-  transform: translate3d(v-bind(frontRotOffset), v-bind(bottomRotOffset), -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDegMinus)) translate3d(v-bind(backRotOffset), v-bind(topRotOffset), -25vmin);
+  transform: translate3d(v-bind(frontRotOffset),
+      v-bind(bottomRotOffset),
+      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDegMinus)) translate3d(v-bind(backRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .right2 {
@@ -487,7 +499,9 @@ onMounted(() => {
   right: v-bind(frontLeft);
   width: v-bind(frontWidth);
   height: v-bind(frontHeight);
-  transform: translate3d(v-bind(rightRotOffset), v-bind(bottomRotOffset), -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDegMinus)) translate3d(v-bind(leftRotOffset), v-bind(topRotOffset), -25vmin);
+  transform: translate3d(v-bind(rightRotOffset),
+      v-bind(bottomRotOffset),
+      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDegMinus)) translate3d(v-bind(leftRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .back2 {
@@ -513,7 +527,9 @@ onMounted(() => {
   right: v-bind(rightLeft);
   width: v-bind(rightWidth);
   height: v-bind(rightHeight);
-  transform: translate3d(v-bind(backRotOffset), v-bind(bottomRotOffset), -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDeg)) translate3d(v-bind(frontRotOffset), v-bind(topRotOffset), -25vmin);
+  transform: translate3d(v-bind(backRotOffset),
+      v-bind(bottomRotOffset),
+      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDeg)) translate3d(v-bind(frontRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .left2 {
