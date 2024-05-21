@@ -162,14 +162,14 @@ const y0OffsetVMmin = computed(() => (y0Offset.value - .001) * 25 + "vmin");
 const y1OffsetVMmin = computed(() => (y1Offset.value - .001) * 25 + "vmin");
 const z0OffsetVMmin = computed(() => (z0Offset.value - .001) * 25 + "vmin");
 const z1OffsetVMmin = computed(() => (z1Offset.value - .001) * 25 + "vmin");
-const rotAxis: Ref<0 | 1 | 2 | 3> = ref(1)
+const rotAxis: Ref<0 | 1 | 2 | 3> = ref(2)
 const xShow = computed(() => rotAxis.value === 1);
 const yShow = computed(() => rotAxis.value === 2);
 const zShow = computed(() => rotAxis.value === 3);
 const xRot = ref(0)
 const yRot = ref(0)
 const zRot = ref(0)
-setInterval(() => xRot.value = (xRot.value + 10) % 360, 160)
+setInterval(() => yRot.value = (yRot.value + 10) % 360, 160)
 const xRotDeg = computed(() => xRot.value + "deg")
 const yRotDeg = computed(() => yRot.value + "deg")
 const zRotDeg = computed(() => zRot.value + "deg")
@@ -333,6 +333,27 @@ onMounted(() => {
 
 .bottom {
   transform: rotate(v-bind(bottomZRot))
+}
+
+.bottom0 {
+  bottom: 0;
+  left: 0;
+  width: v-bind(topLeft);
+  height: v-bind(topTop);
+}
+
+.bottom1 {
+  bottom: v-bind(topTop);
+  left: v-bind(topLeft);
+  width: v-bind(topWidth);
+  height: v-bind(topHeight)
+}
+
+.bottom2 {
+  top: 0;
+  right: 0;
+  width: v-bind(topRight);
+  height: v-bind(topBottom)
 }
 
 .front {
