@@ -150,56 +150,98 @@ const back = ref<HTMLCanvasElement>();
 const top = ref<HTMLCanvasElement>();
 const bottom = ref<HTMLCanvasElement>();
 
-const x0Offset = ref(.7);
-const x1Offset = ref(.8);
-const y0Offset = ref(.4);
-const y1Offset = ref(.3);
-const z0Offset = ref(.6);
-const z1Offset = ref(.5);
-const x0OffsetVMmin = computed(() => (x0Offset.value - .001) * 25 + "vmin");
-const x1OffsetVMmin = computed(() => (x1Offset.value - .001) * 25 + "vmin");
-const y0OffsetVMmin = computed(() => (y0Offset.value - .001) * 25 + "vmin");
-const y1OffsetVMmin = computed(() => (y1Offset.value - .001) * 25 + "vmin");
-const z0OffsetVMmin = computed(() => (z0Offset.value - .001) * 25 + "vmin");
-const z1OffsetVMmin = computed(() => (z1Offset.value - .001) * 25 + "vmin");
-const rotAxis: Ref<0 | 1 | 2 | 3> = ref(3)
+const x0Offset = ref(0.7);
+const x1Offset = ref(-0.6);
+const y0Offset = ref(0.4);
+const y1Offset = ref(-0.3);
+const z0Offset = ref(0.6);
+const z1Offset = ref(-0.5);
+const x0OffsetVMmin = computed(() => (x0Offset.value - 0.001) * 25 + "vmin");
+const x1OffsetVMmin = computed(() => (x1Offset.value - 0.001) * 25 + "vmin");
+const y0OffsetVMmin = computed(() => (y0Offset.value - 0.001) * 25 + "vmin");
+const y1OffsetVMmin = computed(() => (y1Offset.value - 0.001) * 25 + "vmin");
+const z0OffsetVMmin = computed(() => (z0Offset.value - 0.001) * 25 + "vmin");
+const z1OffsetVMmin = computed(() => (z1Offset.value - 0.001) * 25 + "vmin");
+const rotAxis: Ref<0 | 1 | 2 | 3> = ref(3);
 const xShow = computed(() => rotAxis.value === 1);
 const yShow = computed(() => rotAxis.value === 2);
 const zShow = computed(() => rotAxis.value === 3);
-const xRot = ref(0)
-const yRot = ref(0)
-const zRot = ref(0)
-setInterval(() => zRot.value = (zRot.value + 10) % 360, 160)
-const xRotDeg = computed(() => xRot.value + "deg")
-const yRotDeg = computed(() => yRot.value + "deg")
-const zRotDeg = computed(() => zRot.value + "deg")
-const xRotDegMinus = computed(() => -xRot.value + "deg")
-const yRotDegMinus = computed(() => -yRot.value + "deg")
-const zRotDegMinus = computed(() => -zRot.value + "deg")
-const topZRot = computed(() => y0Offset.value === 1 ? yRot.value + "deg" : "0deg")
-const bottomZRot = computed(() => y1Offset.value === 1 ? -yRot.value + "deg" : "0deg")
-const frontZRot = computed(() => x0Offset.value === 1 ? xRot.value + "deg" : "0deg")
-const rightZRot = computed(() => z0Offset.value === 1 ? zRot.value + "deg" : "0deg")
-const backZRot = computed(() => x1Offset.value === 1 ? -xRot.value + "deg" : "0deg")
-const leftZRot = computed(() => z1Offset.value === 1 ? -zRot.value + "deg" : "0deg")
-const topTop = computed(() => (1 - x1Offset.value) * 25 + "vmin")
-const topBottom = computed(() => (1 - x0Offset.value) * 25 + "vmin")
-const topLeft = computed(() => (1 - z1Offset.value) * 25 + "vmin")
-const topRight = computed(() => (1 - z0Offset.value) * 25 + "vmin")
-const topWidth = computed(() => (z0Offset.value + z1Offset.value) * 25 + "vmin")
-const topHeight = computed(() => (x0Offset.value + x1Offset.value) * 25 + "vmin")
-const frontTop = computed(() => (1 - y0Offset.value) * 25 + "vmin")
-const frontBottom = computed(() => (1 - y1Offset.value) * 25 + "vmin")
-const frontLeft = computed(() => (1 - z1Offset.value) * 25 + "vmin")
-const frontRight = computed(() => (1 - z0Offset.value) * 25 + "vmin")
-const frontWidth = computed(() => (z0Offset.value + z1Offset.value) * 25 + "vmin")
-const frontHeight = computed(() => (y0Offset.value + y1Offset.value) * 25 + "vmin")
-const rightTop = computed(() => (1 - y0Offset.value) * 25 + "vmin")
-const rightBottom = computed(() => (1 - y1Offset.value) * 25 + "vmin")
-const rightLeft = computed(() => (1 - x0Offset.value) * 25 + "vmin")
-const rightRight = computed(() => (1 - x1Offset.value) * 25 + "vmin")
-const rightWidth = computed(() => (x0Offset.value + x1Offset.value) * 25 + "vmin")
-const rightHeight = computed(() => (y0Offset.value + y1Offset.value) * 25 + "vmin")
+const xRot = ref(0);
+const yRot = ref(0);
+const zRot = ref(0);
+setInterval(() => (zRot.value = (zRot.value + 10) % 360), 160);
+const xRotDeg = computed(() => xRot.value + "deg");
+const yRotDeg = computed(() => yRot.value + "deg");
+const zRotDeg = computed(() => zRot.value + "deg");
+const xRotDegMinus = computed(() => -xRot.value + "deg");
+const yRotDegMinus = computed(() => -yRot.value + "deg");
+const zRotDegMinus = computed(() => -zRot.value + "deg");
+const topZRot = computed(() =>
+  y0Offset.value === 1 ? yRot.value + "deg" : "0deg",
+);
+const bottomZRot = computed(() =>
+  y1Offset.value === 1 ? -yRot.value + "deg" : "0deg",
+);
+const frontZRot = computed(() =>
+  x0Offset.value === 1 ? xRot.value + "deg" : "0deg",
+);
+const rightZRot = computed(() =>
+  z0Offset.value === 1 ? zRot.value + "deg" : "0deg",
+);
+const backZRot = computed(() =>
+  x1Offset.value === 1 ? -xRot.value + "deg" : "0deg",
+);
+const leftZRot = computed(() =>
+  z1Offset.value === 1 ? -zRot.value + "deg" : "0deg",
+);
+const topTop = computed(() => (1 - x1Offset.value) * 25 + "vmin");
+const topBottom = computed(() => (1 - x0Offset.value) * 25 + "vmin");
+const topLeft = computed(() => (1 - z1Offset.value) * 25 + "vmin");
+const topRight = computed(() => (1 - z0Offset.value) * 25 + "vmin");
+const topWidth = computed(
+  () => (z0Offset.value + z1Offset.value) * 25 + "vmin",
+);
+const topHeight = computed(
+  () => (x0Offset.value + x1Offset.value) * 25 + "vmin",
+);
+const frontTop = computed(() => (1 - y0Offset.value) * 25 + "vmin");
+const frontBottom = computed(() => (1 - y1Offset.value) * 25 + "vmin");
+const frontLeft = computed(() => (1 - z1Offset.value) * 25 + "vmin");
+const frontRight = computed(() => (1 - z0Offset.value) * 25 + "vmin");
+const frontWidth = computed(
+  () => (z0Offset.value + z1Offset.value) * 25 + "vmin",
+);
+const frontHeight = computed(
+  () => (y0Offset.value + y1Offset.value) * 25 + "vmin",
+);
+const rightTop = computed(() => (1 - y0Offset.value) * 25 + "vmin");
+const rightBottom = computed(() => (1 - y1Offset.value) * 25 + "vmin");
+const rightLeft = computed(() => (1 - x0Offset.value) * 25 + "vmin");
+const rightRight = computed(() => (1 - x1Offset.value) * 25 + "vmin");
+const rightWidth = computed(
+  () => (x0Offset.value + x1Offset.value) * 25 + "vmin",
+);
+const rightHeight = computed(
+  () => (y0Offset.value + y1Offset.value) * 25 + "vmin",
+);
+const topRotOffset = computed(
+  () => (y1Offset.value - y0Offset.value) * 12.5 + "vmin",
+);
+const bottomRotOffset = computed(
+  () => (y0Offset.value - y1Offset.value) * 12.5 + "vmin",
+);
+const rightRotOffset = computed(
+  () => (z0Offset.value - z1Offset.value) * 12.5 + "vmin",
+);
+const leftRotOffset = computed(
+  () => (z1Offset.value - z0Offset.value) * 12.5 + "vmin",
+);
+const frontRotOffset = computed(
+  () => (x0Offset.value - x1Offset.value) * 12.5 + "vmin",
+);
+const backRotOffset = computed(
+  () => (x1Offset.value - x0Offset.value) * 12.5 + "vmin",
+);
 const topSplit0 = ref<HTMLCanvasElement>();
 const topSplit1 = ref<HTMLCanvasElement>();
 const topSplit2 = ref<HTMLCanvasElement>();
@@ -307,7 +349,6 @@ onMounted(() => {
 }
 
 .split {
-  background-color: green;
   position: absolute;
   border: 0.15rem black solid;
 }
@@ -319,7 +360,7 @@ onMounted(() => {
 }
 
 .top {
-  transform: rotate(v-bind(topZRot))
+  transform: rotate(v-bind(topZRot));
 }
 
 .top0 {
@@ -333,18 +374,19 @@ onMounted(() => {
   top: v-bind(topTop);
   left: v-bind(topLeft);
   width: v-bind(topWidth);
-  height: v-bind(topHeight)
+  height: v-bind(topHeight);
+  transform: translate3d(v-bind(leftRotOffset), v-bind(backRotOffset), -25vmin) rotateY(v-bind(xRotDeg)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(frontRotOffset), -25vmin);
 }
 
 .top2 {
   bottom: 0;
   right: 0;
   width: v-bind(topRight);
-  height: v-bind(topBottom)
+  height: v-bind(topBottom);
 }
 
 .bottom {
-  transform: rotate(v-bind(bottomZRot))
+  transform: rotate(v-bind(bottomZRot));
 }
 
 .bottom0 {
@@ -358,18 +400,19 @@ onMounted(() => {
   bottom: v-bind(topTop);
   left: v-bind(topLeft);
   width: v-bind(topWidth);
-  height: v-bind(topHeight)
+  height: v-bind(topHeight);
+  transform: translate3d(v-bind(leftRotOffset), v-bind(frontRotOffset), -25vmin) rotateY(v-bind(xRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(backRotOffset), -25vmin);
 }
 
 .bottom2 {
   top: 0;
   right: 0;
   width: v-bind(topRight);
-  height: v-bind(topBottom)
+  height: v-bind(topBottom);
 }
 
 .front {
-  transform: rotate(v-bind(frontZRot))
+  transform: rotate(v-bind(frontZRot));
 }
 
 .front0 {
@@ -383,18 +426,19 @@ onMounted(() => {
   top: v-bind(frontTop);
   left: v-bind(frontLeft);
   width: v-bind(frontWidth);
-  height: v-bind(frontHeight)
+  height: v-bind(frontHeight);
+  transform: translate3d(v-bind(leftRotOffset), v-bind(bottomRotOffset), -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .front2 {
   bottom: 0;
   right: 0;
   width: v-bind(frontRight);
-  height: v-bind(frontBottom)
+  height: v-bind(frontBottom);
 }
 
 .right {
-  transform: rotate(v-bind(rightZRot))
+  transform: rotate(v-bind(rightZRot));
 }
 
 .right0 {
@@ -408,18 +452,19 @@ onMounted(() => {
   top: v-bind(rightTop);
   left: v-bind(rightLeft);
   width: v-bind(rightWidth);
-  height: v-bind(rightHeight)
+  height: v-bind(rightHeight);
+  transform: translate3d(v-bind(frontRotOffset), v-bind(bottomRotOffset), -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDegMinus)) translate3d(v-bind(backRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .right2 {
   bottom: 0;
   right: 0;
   width: v-bind(rightRight);
-  height: v-bind(rightBottom)
+  height: v-bind(rightBottom);
 }
 
 .back {
-  transform: rotate(v-bind(backZRot))
+  transform: rotate(v-bind(backZRot));
 }
 
 .back0 {
@@ -433,18 +478,19 @@ onMounted(() => {
   top: v-bind(frontTop);
   right: v-bind(frontLeft);
   width: v-bind(frontWidth);
-  height: v-bind(frontHeight)
+  height: v-bind(frontHeight);
+  transform: translate3d(v-bind(rightRotOffset), v-bind(bottomRotOffset), -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDegMinus)) translate3d(v-bind(leftRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .back2 {
   bottom: 0;
   left: 0;
   width: v-bind(frontRight);
-  height: v-bind(frontBottom)
+  height: v-bind(frontBottom);
 }
 
 .left {
-  transform: rotate(v-bind(leftZRot))
+  transform: rotate(v-bind(leftZRot));
 }
 
 .left0 {
@@ -458,14 +504,15 @@ onMounted(() => {
   top: v-bind(rightTop);
   right: v-bind(rightLeft);
   width: v-bind(rightWidth);
-  height: v-bind(rightHeight)
+  height: v-bind(rightHeight);
+  transform: translate3d(v-bind(backRotOffset), v-bind(bottomRotOffset), -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDeg)) translate3d(v-bind(frontRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .left2 {
   bottom: 0;
   left: 0;
   width: v-bind(rightRight);
-  height: v-bind(rightBottom)
+  height: v-bind(rightBottom);
 }
 </style>
 <style lang="scss">
