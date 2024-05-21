@@ -67,9 +67,9 @@ class Face {
   editedIndexes: number[] = [];
   rotate: 0 | 1 | 2 | 3 = 0;
   ctx: CanvasRenderingContext2D;
-  ctx0: CanvasRenderingContext2D
-  ctx1: CanvasRenderingContext2D
-  ctx2: CanvasRenderingContext2D
+  ctx0: CanvasRenderingContext2D;
+  ctx1: CanvasRenderingContext2D;
+  ctx2: CanvasRenderingContext2D;
   constructor(
     public canvas: HTMLCanvasElement,
     public splits: HTMLCanvasElement[],
@@ -80,10 +80,10 @@ class Face {
     this.ctx = canvas.getContext("2d")!;
     this.ctx.fillStyle = i2color[initialColor];
     this.ctx.fillRect(0, 0, canvas.width, canvas.height);
-    this.ctx0 = splits[0].getContext("2d")!
-    this.ctx1 = splits[0].getContext("2d")!
-    this.ctx2 = splits[0].getContext("2d")!
-    this.render(1, 1, "X")
+    this.ctx0 = splits[0].getContext("2d")!;
+    this.ctx1 = splits[0].getContext("2d")!;
+    this.ctx2 = splits[0].getContext("2d")!;
+    this.render(1, 1, "X");
   }
   getIndexAt(x: number, y: number) {
     switch (this.rotate) {
@@ -125,7 +125,7 @@ class Face {
       pixelSize,
     );
   }
-  render(offset0: number, offset1: number, axis: "X" | "Y") { }
+  render(offset0: number, offset1: number, axis: "X" | "Y") {}
 }
 class Cube {
   front: Face;
@@ -137,13 +137,17 @@ class Cube {
   constructor(
     canvases: HTMLCanvasElement[],
     splits: HTMLCanvasElement[],
-    public offsets: {
+    public animParams: {
       x0Offset: Ref<number>;
       x1Offset: Ref<number>;
       y0Offset: Ref<number>;
       y1Offset: Ref<number>;
       z0Offset: Ref<number>;
       z1Offset: Ref<number>;
+      rotAxis: Ref<0 | 1 | 2 | 3>;
+      xRot: Ref<number>;
+      yRot: Ref<number>;
+      zRot: Ref<number>;
     },
     size: number,
   ) {
@@ -306,7 +310,18 @@ onMounted(() => {
       leftSplit1.value!,
       leftSplit2.value!,
     ],
-    { x0Offset, x1Offset, y0Offset, y1Offset, z0Offset, z1Offset },
+    {
+      x0Offset,
+      x1Offset,
+      y0Offset,
+      y1Offset,
+      z0Offset,
+      z1Offset,
+      rotAxis,
+      xRot,
+      yRot,
+      zRot,
+    },
     5,
   );
 });
@@ -320,7 +335,8 @@ onMounted(() => {
   transform-style: preserve-3d;
   --rotY: v-bind(rotY);
   --rotX: v-bind(rotX);
-  transform: rotateX(calc(var(--rotX) * 1deg)) rotateY(calc(var(--rotY) * 1deg)) translateX(-25vmin) translateY(-25vmin);
+  transform: rotateX(calc(var(--rotX) * 1deg)) rotateY(calc(var(--rotY) * 1deg))
+    translateX(-25vmin) translateY(-25vmin);
 }
 
 .face {
@@ -333,7 +349,6 @@ onMounted(() => {
   pointer-events: none;
 }
 
-
 .base {
   transform: rotateX(calc(90deg * var(--i))) translateZ(25vmin);
 }
@@ -343,27 +358,33 @@ onMounted(() => {
 }
 
 .x0 {
-  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin)) rotate(v-bind(xRotDeg));
+  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin))
+    rotate(v-bind(xRotDeg));
 }
 
 .x1 {
-  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin)) rotate(v-bind(xRotDegMinus));
+  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin))
+    rotate(v-bind(xRotDegMinus));
 }
 
 .y0 {
-  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin)) rotate(v-bind(yRotDeg));
+  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin))
+    rotate(v-bind(yRotDeg));
 }
 
 .y1 {
-  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin)) rotate(v-bind(yRotDegMinus));
+  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin))
+    rotate(v-bind(yRotDegMinus));
 }
 
 .z0 {
-  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin)) rotate(v-bind(zRotDeg));
+  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin))
+    rotate(v-bind(zRotDeg));
 }
 
 .z1 {
-  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin)) rotate(v-bind(zRotDegMinus));
+  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin))
+    rotate(v-bind(zRotDegMinus));
 }
 
 .split {
@@ -397,7 +418,9 @@ onMounted(() => {
   left: v-bind(topLeft);
   width: v-bind(topWidth);
   height: v-bind(topHeight);
-  transform: translate3d(v-bind(leftRotOffset), v-bind(backRotOffset), -25vmin) rotateY(v-bind(xRotDeg)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(frontRotOffset), -25vmin);
+  transform: translate3d(v-bind(leftRotOffset), v-bind(backRotOffset), -25vmin)
+    rotateY(v-bind(xRotDeg)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(frontRotOffset), -25vmin);
 }
 
 .top2 {
@@ -423,7 +446,9 @@ onMounted(() => {
   left: v-bind(topLeft);
   width: v-bind(topWidth);
   height: v-bind(topHeight);
-  transform: translate3d(v-bind(leftRotOffset), v-bind(frontRotOffset), -25vmin) rotateY(v-bind(xRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(backRotOffset), -25vmin);
+  transform: translate3d(v-bind(leftRotOffset), v-bind(frontRotOffset), -25vmin)
+    rotateY(v-bind(xRotDegMinus)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(backRotOffset), -25vmin);
 }
 
 .bottom2 {
@@ -449,9 +474,13 @@ onMounted(() => {
   left: v-bind(frontLeft);
   width: v-bind(frontWidth);
   height: v-bind(frontHeight);
-  transform: translate3d(v-bind(leftRotOffset),
+  transform: translate3d(
+      v-bind(leftRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(topRotOffset), -25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .front2 {
@@ -477,9 +506,13 @@ onMounted(() => {
   left: v-bind(rightLeft);
   width: v-bind(rightWidth);
   height: v-bind(rightHeight);
-  transform: translate3d(v-bind(frontRotOffset),
+  transform: translate3d(
+      v-bind(frontRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDegMinus)) translate3d(v-bind(backRotOffset), v-bind(topRotOffset), -25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDegMinus))
+    translate3d(v-bind(backRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .right2 {
@@ -505,9 +538,13 @@ onMounted(() => {
   right: v-bind(frontLeft);
   width: v-bind(frontWidth);
   height: v-bind(frontHeight);
-  transform: translate3d(v-bind(rightRotOffset),
+  transform: translate3d(
+      v-bind(rightRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDegMinus)) translate3d(v-bind(leftRotOffset), v-bind(topRotOffset), -25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDegMinus))
+    translate3d(v-bind(leftRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .back2 {
@@ -533,9 +570,13 @@ onMounted(() => {
   right: v-bind(rightLeft);
   width: v-bind(rightWidth);
   height: v-bind(rightHeight);
-  transform: translate3d(v-bind(backRotOffset),
+  transform: translate3d(
+      v-bind(backRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDeg)) translate3d(v-bind(frontRotOffset), v-bind(topRotOffset), -25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDeg))
+    translate3d(v-bind(frontRotOffset), v-bind(topRotOffset), -25vmin);
 }
 
 .left2 {
@@ -548,7 +589,7 @@ onMounted(() => {
 <style lang="scss">
 html,
 body,
-body> :first-child {
+body > :first-child {
   height: 100%;
   background-color: #555;
 }
