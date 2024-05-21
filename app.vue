@@ -152,8 +152,8 @@ const bottom = ref<HTMLCanvasElement>();
 
 const x0Offset = ref(.7);
 const x1Offset = ref(.8);
-const y0Offset = ref(1);
-const y1Offset = ref(1);
+const y0Offset = ref(.4);
+const y1Offset = ref(.3);
 const z0Offset = ref(.6);
 const z1Offset = ref(.5);
 const x0OffsetVMmin = computed(() => (x0Offset.value - .001) * 25 + "vmin");
@@ -162,14 +162,14 @@ const y0OffsetVMmin = computed(() => (y0Offset.value - .001) * 25 + "vmin");
 const y1OffsetVMmin = computed(() => (y1Offset.value - .001) * 25 + "vmin");
 const z0OffsetVMmin = computed(() => (z0Offset.value - .001) * 25 + "vmin");
 const z1OffsetVMmin = computed(() => (z1Offset.value - .001) * 25 + "vmin");
-const rotAxis: Ref<0 | 1 | 2 | 3> = ref(2)
+const rotAxis: Ref<0 | 1 | 2 | 3> = ref(1)
 const xShow = computed(() => rotAxis.value === 1);
 const yShow = computed(() => rotAxis.value === 2);
 const zShow = computed(() => rotAxis.value === 3);
 const xRot = ref(0)
 const yRot = ref(0)
 const zRot = ref(0)
-setInterval(() => yRot.value = (yRot.value + 10) % 360, 160)
+setInterval(() => xRot.value = (xRot.value + 10) % 360, 160)
 const xRotDeg = computed(() => xRot.value + "deg")
 const yRotDeg = computed(() => yRot.value + "deg")
 const zRotDeg = computed(() => zRot.value + "deg")
@@ -182,10 +182,10 @@ const frontZRot = computed(() => x0Offset.value === 1 ? xRot.value + "deg" : "0d
 const rightZRot = computed(() => z0Offset.value === 1 ? zRot.value + "deg" : "0deg")
 const backZRot = computed(() => x1Offset.value === 1 ? -xRot.value + "deg" : "0deg")
 const leftZRot = computed(() => z1Offset.value === 1 ? -zRot.value + "deg" : "0deg")
-const topTop = computed(() => (1 - x0Offset.value) * 25 + "vmin")
-const topBottom = computed(() => (1 - x1Offset.value) * 25 + "vmin")
-const topLeft = computed(() => (1 - z0Offset.value) * 25 + "vmin")
-const topRight = computed(() => (1 - z1Offset.value) * 25 + "vmin")
+const topTop = computed(() => (1 - x1Offset.value) * 25 + "vmin")
+const topBottom = computed(() => (1 - x0Offset.value) * 25 + "vmin")
+const topLeft = computed(() => (1 - z1Offset.value) * 25 + "vmin")
+const topRight = computed(() => (1 - z0Offset.value) * 25 + "vmin")
 const topWidth = computed(() => (z0Offset.value + z1Offset.value) * 25 + "vmin")
 const topHeight = computed(() => (x0Offset.value + x1Offset.value) * 25 + "vmin")
 const topSplit0 = ref<HTMLCanvasElement>();
@@ -297,6 +297,7 @@ onMounted(() => {
 .split {
   background-color: green;
   position: absolute;
+  border: 0.15rem black solid;
 }
 
 .frame {
