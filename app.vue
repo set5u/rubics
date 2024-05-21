@@ -162,14 +162,14 @@ const y0OffsetVMmin = computed(() => (y0Offset.value - .001) * 25 + "vmin");
 const y1OffsetVMmin = computed(() => (y1Offset.value - .001) * 25 + "vmin");
 const z0OffsetVMmin = computed(() => (z0Offset.value - .001) * 25 + "vmin");
 const z1OffsetVMmin = computed(() => (z1Offset.value - .001) * 25 + "vmin");
-const rotAxis: Ref<0 | 1 | 2 | 3> = ref(2)
+const rotAxis: Ref<0 | 1 | 2 | 3> = ref(3)
 const xShow = computed(() => rotAxis.value === 1);
 const yShow = computed(() => rotAxis.value === 2);
 const zShow = computed(() => rotAxis.value === 3);
 const xRot = ref(0)
 const yRot = ref(0)
 const zRot = ref(0)
-setInterval(() => yRot.value = (yRot.value + 10) % 360, 160)
+setInterval(() => xRot.value = (xRot.value + 10) % 360, 160)
 const xRotDeg = computed(() => xRot.value + "deg")
 const yRotDeg = computed(() => yRot.value + "deg")
 const zRotDeg = computed(() => zRot.value + "deg")
@@ -188,6 +188,12 @@ const topLeft = computed(() => (1 - z1Offset.value) * 25 + "vmin")
 const topRight = computed(() => (1 - z0Offset.value) * 25 + "vmin")
 const topWidth = computed(() => (z0Offset.value + z1Offset.value) * 25 + "vmin")
 const topHeight = computed(() => (x0Offset.value + x1Offset.value) * 25 + "vmin")
+const frontTop = computed(() => (1 - y0Offset.value) * 25 + "vmin")
+const frontBottom = computed(() => (1 - y1Offset.value) * 25 + "vmin")
+const frontLeft = computed(() => (1 - z1Offset.value) * 25 + "vmin")
+const frontRight = computed(() => (1 - z0Offset.value) * 25 + "vmin")
+const frontWidth = computed(() => (z0Offset.value + z1Offset.value) * 25 + "vmin")
+const frontHeight = computed(() => (y0Offset.value + y1Offset.value) * 25 + "vmin")
 const topSplit0 = ref<HTMLCanvasElement>();
 const topSplit1 = ref<HTMLCanvasElement>();
 const topSplit2 = ref<HTMLCanvasElement>();
@@ -360,12 +366,54 @@ onMounted(() => {
   transform: rotate(v-bind(frontZRot))
 }
 
+.front0 {
+  top: 0;
+  left: 0;
+  width: v-bind(frontLeft);
+  height: v-bind(frontTop);
+}
+
+.front1 {
+  top: v-bind(frontTop);
+  left: v-bind(frontLeft);
+  width: v-bind(frontWidth);
+  height: v-bind(frontHeight)
+}
+
+.front2 {
+  bottom: 0;
+  right: 0;
+  width: v-bind(frontRight);
+  height: v-bind(frontBottom)
+}
+
 .right {
   transform: rotate(v-bind(rightZRot))
 }
 
 .back {
   transform: rotate(v-bind(backZRot))
+}
+
+.back0 {
+  top: 0;
+  right: 0;
+  width: v-bind(frontLeft);
+  height: v-bind(frontTop);
+}
+
+.back1 {
+  top: v-bind(frontTop);
+  right: v-bind(frontLeft);
+  width: v-bind(frontWidth);
+  height: v-bind(frontHeight)
+}
+
+.back2 {
+  bottom: 0;
+  left: 0;
+  width: v-bind(frontRight);
+  height: v-bind(frontBottom)
 }
 
 .left {
