@@ -1,13 +1,13 @@
 <template lang="pug">
 .h-full
-  .h-full.flex.justify-center.items-center.scene.overflow-hidden(@mousedown.exact.capture="lock" @mouseup.exact="unlock")
+  .h-full.flex.justify-center.items-center.scene.overflow-hidden(@mousedown.self.capture="lock" @mouseup.self="unlock")
     .cube
-      canvas.face.base(style="--i: 1")
-      canvas.face.base(style="--i: -1")
-      canvas.face.side(style="--i: 0")
-      canvas.face.side(style="--i: 1")
-      canvas.face.side(style="--i: 2")
-      canvas.face.side(style="--i: 3")
+      canvas.face.base(ref="top" style="--i: 1")
+      canvas.face.base(ref="bottom" style="--i: -1")
+      canvas.face.side(ref="front" style="--i: 0")
+      canvas.face.side(ref="right" style="--i: 1")
+      canvas.face.side(ref="back" style="--i: 2")
+      canvas.face.side(ref="left" style="--i: 3")
 </template>
 <script setup lang="ts">
 const { x, y } = useMouse({ type: 'movement' })
@@ -28,23 +28,17 @@ enum Color {
   W,
   O,
 }
-const i2color = [[255, 0, 0, 255], [0, 127, 0, 255], [0, 0, 255, 255], [255, 255, 0, 255], [255, 255, 255, 255], [255, 127, 0, 255]] as const
+const i2color = ["red", "green", "blue", "yellow", "white", "orange"] as const
 class Face {
   data: Color[]
-  image: ImageData
   editedIndexes: number[] = []
   rotate: 0 | 1 | 2 | 3 = 0
-  constructor(public size: number, initialColor: Color = Color.R) {
+  ctx: CanvasRenderingContext2D
+  constructor(public canvas: HTMLCanvasElement, public size: number, initialColor: Color) {
     this.data = Array<number>(size ** 2).fill(initialColor)
-    this.image = new ImageData(size, size)
-    const data = this.image.data
-    const color = i2color[initialColor]
-    for (let i = 0; i < size ** 2; i++) {
-      data[i ** 4 + 0] = color[0]
-      data[i ** 4 + 1] = color[1]
-      data[i ** 4 + 2] = color[2]
-      data[i ** 4 + 3] = color[3]
-    }
+    this.ctx = canvas.getContext("2d")!
+    this.ctx.fillStyle = i2color[initialColor]
+    this.ctx.fillRect(0, 0, canvas.width, canvas.height)
   }
   getIndexAt(x: number, y: number) {
     switch (this.rotate) {
@@ -58,18 +52,28 @@ class Face {
         return (this.size - y - 1) + this.size * x
     }
   }
+  getCoordAt(x: number, y: number) {
+    switch (this.rotate) {
+      case 0:
+        return [x, y]
+      case 1:
+        return [y, (this.size - x - 1)]
+      case 2:
+        return [(this.size - x - 1), (this.size - y - 1)]
+      case 3:
+        return [(this.size - y - 1), x]
+    }
+  }
   getAt(x: number, y: number) {
     return this.data[this.getIndexAt(x, y)]
   }
   setAt(x: number, y: number, v: Color) {
     const i = this.getIndexAt(x, y)
     this.data[i] = v
-    const data = this.image.data
-    const color = i2color[v]
-    data[i ** 4 + 0] = color[0]
-    data[i ** 4 + 1] = color[1]
-    data[i ** 4 + 2] = color[2]
-    data[i ** 4 + 3] = color[3]
+    const [coordX, coordY] = this.getCoordAt(x, y)
+    const pixelSize = this.canvas.width / this.size
+    this.ctx.fillStyle = i2color[v]
+    this.ctx.fillRect(coordX * pixelSize, coordY * pixelSize, pixelSize, pixelSize)
   }
 }
 class Cube {
@@ -79,15 +83,24 @@ class Cube {
   back: Face
   top: Face
   bottom: Face
-  constructor(size: number) {
-    this.front = new Face(size, Color.R)
-    this.right = new Face(size, Color.G)
-    this.left = new Face(size, Color.B)
-    this.back = new Face(size, Color.O)
-    this.top = new Face(size, Color.Y)
-    this.bottom = new Face(size, Color.W)
+  constructor(canvases: HTMLCanvasElement[], size: number) {
+    this.front = new Face(canvases[0], size, Color.R)
+    this.right = new Face(canvases[1], size, Color.G)
+    this.left = new Face(canvases[2], size, Color.B)
+    this.back = new Face(canvases[3], size, Color.O)
+    this.top = new Face(canvases[4], size, Color.Y)
+    this.bottom = new Face(canvases[5], size, Color.W)
   }
 }
+const front = ref<HTMLCanvasElement>()
+const right = ref<HTMLCanvasElement>()
+const left = ref<HTMLCanvasElement>()
+const back = ref<HTMLCanvasElement>()
+const top = ref<HTMLCanvasElement>()
+const bottom = ref<HTMLCanvasElement>()
+onMounted(() => {
+  const cube = new Cube([front.value!, right.value!, left.value!, back.value!, top.value!, bottom.value!], 5)
+})
 </script>
 <style scoped lang="scss">
 .scene {
