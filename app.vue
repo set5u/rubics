@@ -20,27 +20,27 @@
       .bg-gray-400.face.splitter.z1(v-show="zShow")
       .face.base(style="--i: 1"): .top.frame
         canvas.split.top0(ref="topSplit0")
-        canvas.split.top1(ref="topSplit1")
+        canvas.split.middle.top1(ref="topSplit1")
         canvas.split.top2(ref="topSplit2")
       .face.base(style="--i: -1"): .bottom.frame
         canvas.split.bottom0(ref="bottomSplit0")
-        canvas.split.bottom1(ref="bottomSplit1")
+        canvas.split.middle.bottom1(ref="bottomSplit1")
         canvas.split.bottom2(ref="bottomSplit2")
       .face.side(style="--i: 0"): .front.frame
         canvas.split.front0(ref="frontSplit0")
-        canvas.split.front1(ref="frontSplit1")
+        canvas.split.middle.front1(ref="frontSplit1")
         canvas.split.front2(ref="frontSplit2")
       .face.side(style="--i: 1"): .right.frame
         canvas.split.right0(ref="rightSplit0")
-        canvas.split.right1(ref="rightSplit1")
+        canvas.split.middle.right1(ref="rightSplit1")
         canvas.split.right2(ref="rightSplit2")
       .face.side(style="--i: 2"): .back.frame
         canvas.split.back0(ref="backSplit0")
-        canvas.split.back1(ref="backSplit1")
+        canvas.split.middle.back1(ref="backSplit1")
         canvas.split.back2(ref="backSplit2")
       .face.side(style="--i: 3"): .left.frame
         canvas.split.left0(ref="leftSplit0")
-        canvas.split.left1(ref="leftSplit1")
+        canvas.split.middle.left1(ref="leftSplit1")
         canvas.split.left2(ref="leftSplit2")
 </template>
 <script setup lang="ts">
@@ -150,12 +150,12 @@ const back = ref<HTMLCanvasElement>();
 const top = ref<HTMLCanvasElement>();
 const bottom = ref<HTMLCanvasElement>();
 
-const x0Offset = ref(0.7);
-const x1Offset = ref(-0.6);
-const y0Offset = ref(0.4);
-const y1Offset = ref(-0.3);
-const z0Offset = ref(0.6);
-const z1Offset = ref(-0.5);
+const x0Offset = ref(1);
+const x1Offset = ref(1);
+const y0Offset = ref(1);
+const y1Offset = ref(1);
+const z0Offset = ref(1);
+const z1Offset = ref(1);
 const x0OffsetVMmin = computed(() => (x0Offset.value - 0.001) * 25 + "vmin");
 const x1OffsetVMmin = computed(() => (x1Offset.value - 0.001) * 25 + "vmin");
 const y0OffsetVMmin = computed(() => (y0Offset.value - 0.001) * 25 + "vmin");
@@ -313,7 +313,11 @@ onMounted(() => {
   left: 0;
   width: 50vmin;
   height: 50vmin;
-  border: 0.15rem black solid;
+  pointer-events: none;
+}
+
+.face>* {
+  pointer-events: all;
 }
 
 .base {
@@ -350,6 +354,10 @@ onMounted(() => {
 
 .split {
   position: absolute;
+
+}
+
+.middle {
   border: 0.15rem black solid;
 }
 
@@ -520,5 +528,6 @@ html,
 body,
 body> :first-child {
   height: 100%;
+  background-color: #555;
 }
 </style>
