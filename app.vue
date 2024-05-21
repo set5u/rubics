@@ -12,12 +12,12 @@
     @mouseup.self="unlock"
   )
     .cube
-      .bg-gray-400.face.split.x0(v-show="x0Show")
-      .bg-gray-400.face.split.x1(v-show="x1Show")
-      .bg-gray-400.face.split.y0(v-show="y0Show")
-      .bg-gray-400.face.split.y1(v-show="y1Show")
-      .bg-gray-400.face.split.z0(v-show="z0Show")
-      .bg-gray-400.face.split.z1(v-show="z1Show")
+      .bg-gray-400.face.split.x0(v-show="xShow")
+      .bg-gray-400.face.split.x1(v-show="xShow")
+      .bg-gray-400.face.split.y0(v-show="yShow")
+      .bg-gray-400.face.split.y1(v-show="yShow")
+      .bg-gray-400.face.split.z0(v-show="zShow")
+      .bg-gray-400.face.split.z1(v-show="zShow")
       .face.base(style="--i: 1"): canvas.top0(ref="topSplit0")
       .face.base(style="--i: 1"): canvas.top1(ref="topSplit1")
       .face.base(style="--i: 1"): canvas.top2(ref="topSplit2")
@@ -144,24 +144,30 @@ const back = ref<HTMLCanvasElement>();
 const top = ref<HTMLCanvasElement>();
 const bottom = ref<HTMLCanvasElement>();
 
-const x0Offset = ref(0);
-const x1Offset = ref(0);
-const y0Offset = ref(0);
-const y1Offset = ref(0);
-const z0Offset = ref(0);
-const z1Offset = ref(0);
-const x0OffsetVMmin = computed(() => x0Offset.value * 25 + "vmin");
-const x1OffsetVMmin = computed(() => x1Offset.value * 25 + "vmin");
-const y0OffsetVMmin = computed(() => y0Offset.value * 25 + "vmin");
-const y1OffsetVMmin = computed(() => y1Offset.value * 25 + "vmin");
-const z0OffsetVMmin = computed(() => z0Offset.value * 25 + "vmin");
-const z1OffsetVMmin = computed(() => z1Offset.value * 25 + "vmin");
-const x0Show = ref(false);
-const x1Show = ref(false);
-const y0Show = ref(false);
-const y1Show = ref(false);
-const z0Show = ref(false);
-const z1Show = ref(false);
+const x0Offset = ref(.1);
+const x1Offset = ref(-.2);
+const y0Offset = ref(.3);
+const y1Offset = ref(-.4);
+const z0Offset = ref(.5);
+const z1Offset = ref(-.6);
+const x0OffsetVMmin = computed(() => (x0Offset.value - .0001) * 25 + "vmin");
+const x1OffsetVMmin = computed(() => (x1Offset.value - .0001) * 25 + "vmin");
+const y0OffsetVMmin = computed(() => (y0Offset.value - .0001) * 25 + "vmin");
+const y1OffsetVMmin = computed(() => (y1Offset.value - .0001) * 25 + "vmin");
+const z0OffsetVMmin = computed(() => (z0Offset.value - .0001) * 25 + "vmin");
+const z1OffsetVMmin = computed(() => (z1Offset.value - .0001) * 25 + "vmin");
+const xShow = ref(true);
+const yShow = ref(false);
+const zShow = ref(false);
+const xRot = ref(30)
+const yRot = ref(0)
+const zRot = ref(0)
+const xRotDeg = computed(() => xRot.value + "deg")
+const yRotDeg = computed(() => yRot.value + "deg")
+const zRotDeg = computed(() => zRot.value + "deg")
+const xRotDegMinus = computed(() => -xRot.value + "deg")
+const yRotDegMinus = computed(() => -yRot.value + "deg")
+const zRotDegMinus = computed(() => -zRot.value + "deg")
 
 const topSplit0 = ref<HTMLCanvasElement>();
 const topSplit1 = ref<HTMLCanvasElement>();
@@ -224,8 +230,7 @@ onMounted(() => {
   transform-style: preserve-3d;
   --rotY: v-bind(rotY);
   --rotX: v-bind(rotX);
-  transform: rotateX(calc(var(--rotX) * 1deg)) rotateY(calc(var(--rotY) * 1deg))
-    translateX(-25vmin) translateY(-25vmin);
+  transform: rotateX(calc(var(--rotX) * 1deg)) rotateY(calc(var(--rotY) * 1deg)) translateX(-25vmin) translateY(-25vmin);
 }
 
 .face {
@@ -246,33 +251,33 @@ onMounted(() => {
 }
 
 .x0 {
-  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin));
+  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin)) rotate(v-bind(xRotDeg));
 }
 
 .x1 {
-  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin));
+  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin)) rotate(v-bind(xRotDegMinus));
 }
 
 .y0 {
-  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin));
+  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin)) rotate(v-bind(yRotDeg));
 }
 
 .y1 {
-  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin));
+  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin)) rotate(v-bind(yRotDegMinus));
 }
 
 .z0 {
-  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin));
+  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin)) rotate(v-bind(zRotDeg));
 }
 
 .z1 {
-  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin));
+  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin)) rotate(v-bind(zRotDegMinus));
 }
 </style>
 <style lang="scss">
 html,
 body,
-body > :first-child {
+body> :first-child {
   height: 100%;
 }
 </style>
