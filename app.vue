@@ -12,30 +12,36 @@
     @mouseup.self="unlock"
   )
     .cube
-      .bg-gray-400.face.split.x0(v-show="xShow")
-      .bg-gray-400.face.split.x1(v-show="xShow")
-      .bg-gray-400.face.split.y0(v-show="yShow")
-      .bg-gray-400.face.split.y1(v-show="yShow")
-      .bg-gray-400.face.split.z0(v-show="zShow")
-      .bg-gray-400.face.split.z1(v-show="zShow")
-      .face.base(style="--i: 1"): .split.top0: canvas.canvas(ref="topSplit0")
-      .face.base(style="--i: 1"): .split.top1: canvas.canvas(ref="topSplit1")
-      .face.base(style="--i: 1"): .split.top2: canvas.canvas(ref="topSplit2")
-      .face.base(style="--i: -1"): .split.bottom0: canvas.canvas(ref="bottomSplit0")
-      .face.base(style="--i: -1"): .split.bottom0: canvas.canvas(ref="bottomSplit1")
-      .face.base(style="--i: -1"): .split.bottom0: canvas.canvas(ref="bottomSplit2")
-      .face.side(style="--i: 0"): .split.front0: canvas.canvas(ref="frontSplit0")
-      .face.side(style="--i: 0"): .split.front1: canvas.canvas(ref="frontSplit1")
-      .face.side(style="--i: 0"): .split.front2: canvas.canvas(ref="frontSplit2")
-      .face.side(style="--i: 1"): .split.right0: canvas.canvas(ref="rightSplit0")
-      .face.side(style="--i: 1"): .split.right1: canvas.canvas(ref="rightSplit1")
-      .face.side(style="--i: 1"): .split.right2: canvas.canvas(ref="rightSplit2")
-      .face.side(style="--i: 2"): .split.back0: canvas.canvas(ref="backSplit0")
-      .face.side(style="--i: 2"): .split.back1: canvas.canvas(ref="backSplit1")
-      .face.side(style="--i: 2"): .split.back2: canvas.canvas(ref="backSplit2")
-      .face.side(style="--i: 3"): .split.left0: canvas.canvas(ref="leftSplit0")
-      .face.side(style="--i: 3"): .split.left1: canvas.canvas(ref="leftSplit1")
-      .face.side(style="--i: 3"): .split.left2: canvas.canvas(ref="leftSplit2")
+      .bg-gray-400.face.splitter.x0(v-show="xShow")
+      .bg-gray-400.face.splitter.x1(v-show="xShow")
+      .bg-gray-400.face.splitter.y0(v-show="yShow")
+      .bg-gray-400.face.splitter.y1(v-show="yShow")
+      .bg-gray-400.face.splitter.z0(v-show="zShow")
+      .bg-gray-400.face.splitter.z1(v-show="zShow")
+      .face.base(style="--i: 1"): .top.frame
+        canvas.split.top0(ref="topSplit0")
+        canvas.split.top1(ref="topSplit1")
+        canvas.split.top2(ref="topSplit2")
+      .face.base(style="--i: -1"): .bottom.frame
+        canvas.split.bottom0(ref="bottomSplit0")
+        canvas.split.bottom1(ref="bottomSplit1")
+        canvas.split.bottom2(ref="bottomSplit2")
+      .face.side(style="--i: 0"): .front.frame
+        canvas.split.front0(ref="frontSplit0")
+        canvas.split.front1(ref="frontSplit1")
+        canvas.split.front2(ref="frontSplit2")
+      .face.side(style="--i: 1"): .right.frame
+        canvas.split.right0(ref="rightSplit0")
+        canvas.split.right1(ref="rightSplit1")
+        canvas.split.right2(ref="rightSplit2")
+      .face.side(style="--i: 2"): .back.frame
+        canvas.split.back0(ref="backSplit0")
+        canvas.split.back1(ref="backSplit1")
+        canvas.split.back2(ref="backSplit2")
+      .face.side(style="--i: 3"): .left.frame
+        canvas.split.left0(ref="leftSplit0")
+        canvas.split.left1(ref="leftSplit1")
+        canvas.split.left2(ref="leftSplit2")
 </template>
 <script setup lang="ts">
 const { x, y } = useMouse({ type: "movement" });
@@ -144,11 +150,11 @@ const back = ref<HTMLCanvasElement>();
 const top = ref<HTMLCanvasElement>();
 const bottom = ref<HTMLCanvasElement>();
 
-const x0Offset = ref(1);
+const x0Offset = ref(.7);
 const x1Offset = ref(1);
 const y0Offset = ref(1);
 const y1Offset = ref(1);
-const z0Offset = ref(1);
+const z0Offset = ref(.6);
 const z1Offset = ref(1);
 const x0OffsetVMmin = computed(() => (x0Offset.value - .001) * 25 + "vmin");
 const x1OffsetVMmin = computed(() => (x1Offset.value - .001) * 25 + "vmin");
@@ -156,14 +162,14 @@ const y0OffsetVMmin = computed(() => (y0Offset.value - .001) * 25 + "vmin");
 const y1OffsetVMmin = computed(() => (y1Offset.value - .001) * 25 + "vmin");
 const z0OffsetVMmin = computed(() => (z0Offset.value - .001) * 25 + "vmin");
 const z1OffsetVMmin = computed(() => (z1Offset.value - .001) * 25 + "vmin");
-const rotAxis: Ref<0 | 1 | 2 | 3> = ref(1)
+const rotAxis: Ref<0 | 1 | 2 | 3> = ref(2)
 const xShow = computed(() => rotAxis.value === 1);
 const yShow = computed(() => rotAxis.value === 2);
 const zShow = computed(() => rotAxis.value === 3);
 const xRot = ref(0)
 const yRot = ref(0)
 const zRot = ref(0)
-setInterval(() => xRot.value = (xRot.value + 1) % 360, 16)
+setInterval(() => yRot.value = (yRot.value + 10) % 360, 160)
 const xRotDeg = computed(() => xRot.value + "deg")
 const yRotDeg = computed(() => yRot.value + "deg")
 const zRotDeg = computed(() => zRot.value + "deg")
@@ -282,62 +288,39 @@ onMounted(() => {
   transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin)) rotate(v-bind(zRotDegMinus));
 }
 
-.canvas {
-  background: #0f0;
+.split {
+  background-color: green;
 }
 
-div.split {
+.frame {
   transform-style: preserve-3d;
-  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
-div.top0 {}
-
-div.top1 {
+.top {
   transform: rotate(v-bind(topZRot))
 }
 
-div.top2 {}
-
-div.bottom0 {}
-
-div.bottom1 {
+.bottom {
   transform: rotate(v-bind(bottomZRot))
 }
 
-div.bottom2 {}
-
-div.front0 {}
-
-div.front1 {
+.front {
   transform: rotate(v-bind(frontZRot))
 }
 
-div.front2 {}
-
-div.right0 {}
-
-div.right1 {
+.right {
   transform: rotate(v-bind(rightZRot))
 }
 
-div.right2 {}
-
-div.back0 {}
-
-div.back1 {
+.back {
   transform: rotate(v-bind(backZRot))
 }
 
-div.back2 {}
-
-div.left0 {}
-
-div.left1 {
+.left {
   transform: rotate(v-bind(leftZRot))
 }
-
-div.left2 {}
 </style>
 <style lang="scss">
 html,
