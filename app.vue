@@ -8,6 +8,12 @@
       canvas.face.side(ref="right" style="--i: 1")
       canvas.face.side(ref="back" style="--i: 2")
       canvas.face.side(ref="left" style="--i: 3")
+      .bg-gray-400.face.split.x0(v-show="x0Show")
+      .bg-gray-400.face.split.x1(v-show="x1Show")
+      .bg-gray-400.face.split.y0(v-show="y0Show")
+      .bg-gray-400.face.split.y1(v-show="y1Show")
+      .bg-gray-400.face.split.z0(v-show="z0Show")
+      .bg-gray-400.face.split.z1(v-show="z1Show")
 </template>
 <script setup lang="ts">
 const { x, y } = useMouse({ type: 'movement' })
@@ -28,7 +34,7 @@ enum Color {
   W,
   O,
 }
-const i2color = ["red", "green", "blue", "yellow", "white", "orange"] as const
+const i2color = ["red", "lime", "blue", "yellow", "white", "orange"] as const
 class Face {
   data: Color[]
   editedIndexes: number[] = []
@@ -84,6 +90,7 @@ class Cube {
   top: Face
   bottom: Face
   constructor(canvases: HTMLCanvasElement[], size: number) {
+    canvases.forEach((c) => { c.width = Math.max(size, 1024); c.height = Math.max(size, 1024) })
     this.front = new Face(canvases[0], size, Color.R)
     this.right = new Face(canvases[1], size, Color.G)
     this.left = new Face(canvases[2], size, Color.B)
@@ -98,6 +105,25 @@ const left = ref<HTMLCanvasElement>()
 const back = ref<HTMLCanvasElement>()
 const top = ref<HTMLCanvasElement>()
 const bottom = ref<HTMLCanvasElement>()
+
+const x0Offset = ref(0)
+const x1Offset = ref(0)
+const y0Offset = ref(0)
+const y1Offset = ref(0)
+const z0Offset = ref(0)
+const z1Offset = ref(0)
+const x0OffsetVMmin = computed(() => x0Offset.value * 25 + "vmin")
+const x1OffsetVMmin = computed(() => x1Offset.value * 25 + "vmin")
+const y0OffsetVMmin = computed(() => y0Offset.value * 25 + "vmin")
+const y1OffsetVMmin = computed(() => y1Offset.value * 25 + "vmin")
+const z0OffsetVMmin = computed(() => z0Offset.value * 25 + "vmin")
+const z1OffsetVMmin = computed(() => z1Offset.value * 25 + "vmin")
+const x0Show = ref(false)
+const x1Show = ref(false)
+const y0Show = ref(false)
+const y1Show = ref(false)
+const z0Show = ref(false)
+const z1Show = ref(false)
 onMounted(() => {
   const cube = new Cube([front.value!, right.value!, left.value!, back.value!, top.value!, bottom.value!], 5)
 })
@@ -129,6 +155,30 @@ onMounted(() => {
 
 .side {
   transform: rotateY(calc(90deg * var(--i))) translateZ(25vmin);
+}
+
+.x0 {
+  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin));
+}
+
+.x1 {
+  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin));
+}
+
+.y0 {
+  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin));
+}
+
+.y1 {
+  transform: rotateX(calc(90deg *3)) translateZ(v-bind(y1OffsetVMmin));
+}
+
+.z0 {
+  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin));
+}
+
+.z1 {
+  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin));
 }
 </style>
 <style lang="scss">
