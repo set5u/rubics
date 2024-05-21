@@ -18,24 +18,24 @@
       .bg-gray-400.face.split.y1(v-show="yShow")
       .bg-gray-400.face.split.z0(v-show="zShow")
       .bg-gray-400.face.split.z1(v-show="zShow")
-      .face.base(style="--i: 1"): canvas.top0(ref="topSplit0")
-      .face.base(style="--i: 1"): canvas.top1(ref="topSplit1")
-      .face.base(style="--i: 1"): canvas.top2(ref="topSplit2")
-      .face.base(style="--i: -1"): canvas.bottom0(ref="bottomSplit0")
-      .face.base(style="--i: -1"): canvas.bottom1(ref="bottomSplit1")
-      .face.base(style="--i: -1"): canvas.bottom2(ref="bottomSplit2")
-      .face.side(style="--i: 0"): canvas.front0(ref="frontSplit0")
-      .face.side(style="--i: 0"): canvas.front1(ref="frontSplit1")
-      .face.side(style="--i: 0"): canvas.front2(ref="frontSplit2")
-      .face.side(style="--i: 1"): canvas.right0(ref="rightSplit0")
-      .face.side(style="--i: 1"): canvas.right1(ref="rightSplit1")
-      .face.side(style="--i: 1"): canvas.right2(ref="rightSplit2")
-      .face.side(style="--i: 2"): canvas.back0(ref="backSplit0")
-      .face.side(style="--i: 2"): canvas.back1(ref="backSplit1")
-      .face.side(style="--i: 2"): canvas.back2(ref="backSplit2")
-      .face.side(style="--i: 3"): canvas.left0(ref="leftSplit0")
-      .face.side(style="--i: 3"): canvas.left1(ref="leftSplit1")
-      .face.side(style="--i: 3"): canvas.left2(ref="leftSplit2")
+      .face.base(style="--i: 1"): .split.top0: canvas.canvas(ref="topSplit0")
+      .face.base(style="--i: 1"): .split.top1: canvas.canvas(ref="topSplit1")
+      .face.base(style="--i: 1"): .split.top2: canvas.canvas(ref="topSplit2")
+      .face.base(style="--i: -1"): .split.bottom0: canvas.canvas(ref="bottomSplit0")
+      .face.base(style="--i: -1"): .split.bottom0: canvas.canvas(ref="bottomSplit1")
+      .face.base(style="--i: -1"): .split.bottom0: canvas.canvas(ref="bottomSplit2")
+      .face.side(style="--i: 0"): .split.front0: canvas.canvas(ref="frontSplit0")
+      .face.side(style="--i: 0"): .split.front1: canvas.canvas(ref="frontSplit1")
+      .face.side(style="--i: 0"): .split.front2: canvas.canvas(ref="frontSplit2")
+      .face.side(style="--i: 1"): .split.right0: canvas.canvas(ref="rightSplit0")
+      .face.side(style="--i: 1"): .split.right1: canvas.canvas(ref="rightSplit1")
+      .face.side(style="--i: 1"): .split.right2: canvas.canvas(ref="rightSplit2")
+      .face.side(style="--i: 2"): .split.back0: canvas.canvas(ref="backSplit0")
+      .face.side(style="--i: 2"): .split.back1: canvas.canvas(ref="backSplit1")
+      .face.side(style="--i: 2"): .split.back2: canvas.canvas(ref="backSplit2")
+      .face.side(style="--i: 3"): .split.left0: canvas.canvas(ref="leftSplit0")
+      .face.side(style="--i: 3"): .split.left1: canvas.canvas(ref="leftSplit1")
+      .face.side(style="--i: 3"): .split.left2: canvas.canvas(ref="leftSplit2")
 </template>
 <script setup lang="ts">
 const { x, y } = useMouse({ type: "movement" });
@@ -144,31 +144,38 @@ const back = ref<HTMLCanvasElement>();
 const top = ref<HTMLCanvasElement>();
 const bottom = ref<HTMLCanvasElement>();
 
-const x0Offset = ref(.1);
-const x1Offset = ref(-.2);
-const y0Offset = ref(.3);
-const y1Offset = ref(-.4);
-const z0Offset = ref(.5);
-const z1Offset = ref(-.6);
-const x0OffsetVMmin = computed(() => (x0Offset.value - .0001) * 25 + "vmin");
-const x1OffsetVMmin = computed(() => (x1Offset.value - .0001) * 25 + "vmin");
-const y0OffsetVMmin = computed(() => (y0Offset.value - .0001) * 25 + "vmin");
-const y1OffsetVMmin = computed(() => (y1Offset.value - .0001) * 25 + "vmin");
-const z0OffsetVMmin = computed(() => (z0Offset.value - .0001) * 25 + "vmin");
-const z1OffsetVMmin = computed(() => (z1Offset.value - .0001) * 25 + "vmin");
-const xShow = ref(true);
-const yShow = ref(false);
-const zShow = ref(false);
-const xRot = ref(30)
+const x0Offset = ref(1);
+const x1Offset = ref(1);
+const y0Offset = ref(1);
+const y1Offset = ref(1);
+const z0Offset = ref(1);
+const z1Offset = ref(1);
+const x0OffsetVMmin = computed(() => (x0Offset.value - .001) * 25 + "vmin");
+const x1OffsetVMmin = computed(() => (x1Offset.value - .001) * 25 + "vmin");
+const y0OffsetVMmin = computed(() => (y0Offset.value - .001) * 25 + "vmin");
+const y1OffsetVMmin = computed(() => (y1Offset.value - .001) * 25 + "vmin");
+const z0OffsetVMmin = computed(() => (z0Offset.value - .001) * 25 + "vmin");
+const z1OffsetVMmin = computed(() => (z1Offset.value - .001) * 25 + "vmin");
+const rotAxis: Ref<0 | 1 | 2 | 3> = ref(1)
+const xShow = computed(() => rotAxis.value === 1);
+const yShow = computed(() => rotAxis.value === 2);
+const zShow = computed(() => rotAxis.value === 3);
+const xRot = ref(0)
 const yRot = ref(0)
 const zRot = ref(0)
+setInterval(() => xRot.value = (xRot.value + 1) % 360, 16)
 const xRotDeg = computed(() => xRot.value + "deg")
 const yRotDeg = computed(() => yRot.value + "deg")
 const zRotDeg = computed(() => zRot.value + "deg")
 const xRotDegMinus = computed(() => -xRot.value + "deg")
 const yRotDegMinus = computed(() => -yRot.value + "deg")
 const zRotDegMinus = computed(() => -zRot.value + "deg")
-
+const topZRot = computed(() => y0Offset.value === 1 ? yRot.value + "deg" : "0deg")
+const bottomZRot = computed(() => y1Offset.value === 1 ? -yRot.value + "deg" : "0deg")
+const frontZRot = computed(() => x0Offset.value === 1 ? xRot.value + "deg" : "0deg")
+const rightZRot = computed(() => z0Offset.value === 1 ? zRot.value + "deg" : "0deg")
+const backZRot = computed(() => x1Offset.value === 1 ? -xRot.value + "deg" : "0deg")
+const leftZRot = computed(() => z1Offset.value === 1 ? -zRot.value + "deg" : "0deg")
 const topSplit0 = ref<HTMLCanvasElement>();
 const topSplit1 = ref<HTMLCanvasElement>();
 const topSplit2 = ref<HTMLCanvasElement>();
@@ -235,6 +242,7 @@ onMounted(() => {
 
 .face {
   position: absolute;
+  transform-style: preserve-3d;
   top: 0;
   left: 0;
   width: 50vmin;
@@ -273,6 +281,63 @@ onMounted(() => {
 .z1 {
   transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin)) rotate(v-bind(zRotDegMinus));
 }
+
+.canvas {
+  background: #0f0;
+}
+
+div.split {
+  transform-style: preserve-3d;
+  position: absolute;
+}
+
+div.top0 {}
+
+div.top1 {
+  transform: rotate(v-bind(topZRot))
+}
+
+div.top2 {}
+
+div.bottom0 {}
+
+div.bottom1 {
+  transform: rotate(v-bind(bottomZRot))
+}
+
+div.bottom2 {}
+
+div.front0 {}
+
+div.front1 {
+  transform: rotate(v-bind(frontZRot))
+}
+
+div.front2 {}
+
+div.right0 {}
+
+div.right1 {
+  transform: rotate(v-bind(rightZRot))
+}
+
+div.right2 {}
+
+div.back0 {}
+
+div.back1 {
+  transform: rotate(v-bind(backZRot))
+}
+
+div.back2 {}
+
+div.left0 {}
+
+div.left1 {
+  transform: rotate(v-bind(leftZRot))
+}
+
+div.left2 {}
 </style>
 <style lang="scss">
 html,
