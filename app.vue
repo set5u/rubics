@@ -12,18 +12,42 @@
     @mouseup="unlock"
   )
     .cube
-      .bg-gray-400.border-2.border-black.face.splitter.x0(v-show="xShow && x0Offset !== 1")
-      .bg-gray-400.border-2.border-black.face.splitter.x1(v-show="xShow && x1Offset !== 1")
-      .bg-gray-400.border-2.border-black.face.splitter.y0(v-show="yShow && y0Offset !== 1")
-      .bg-gray-400.border-2.border-black.face.splitter.y1(v-show="yShow && y1Offset !== 1")
-      .bg-gray-400.border-2.border-black.face.splitter.z0(v-show="zShow && z1Offset !== 1")
-      .bg-gray-400.border-2.border-black.face.splitter.z1(v-show="zShow && z0Offset !== 1")
-      .bg-gray-400.border-2.border-black.face.splitter.ix0(v-show="xShow && x0Offset !== 1")
-      .bg-gray-400.border-2.border-black.face.splitter.ix1(v-show="xShow && x1Offset !== 1")
-      .bg-gray-400.border-2.border-black.face.splitter.iy0(v-show="yShow && y0Offset !== 1")
-      .bg-gray-400.border-2.border-black.face.splitter.iy1(v-show="yShow && y1Offset !== 1")
-      .bg-gray-400.border-2.border-black.face.splitter.iz0(v-show="zShow && z0Offset !== 1")
-      .bg-gray-400.border-2.border-black.face.splitter.iz1(v-show="zShow && z1Offset !== 1")
+      .bg-gray-400.border-2.border-black.face.splitter.x0(
+        v-show="xShow"
+      )
+      .bg-gray-400.border-2.border-black.face.splitter.x1(
+        v-show="xShow"
+      )
+      .bg-gray-400.border-2.border-black.face.splitter.y0(
+        v-show="yShow"
+      )
+      .bg-gray-400.border-2.border-black.face.splitter.y1(
+        v-show="yShow"
+      )
+      .bg-gray-400.border-2.border-black.face.splitter.z0(
+        v-show="zShow"
+      )
+      .bg-gray-400.border-2.border-black.face.splitter.z1(
+        v-show="zShow"
+      )
+      .bg-gray-400.border-2.border-black.face.splitter.ix0(
+        v-show="xShow && x0Offset !== 1"
+      )
+      .bg-gray-400.border-2.border-black.face.splitter.ix1(
+        v-show="xShow && x1Offset !== 1"
+      )
+      .bg-gray-400.border-2.border-black.face.splitter.iy0(
+        v-show="yShow && y0Offset !== 1"
+      )
+      .bg-gray-400.border-2.border-black.face.splitter.iy1(
+        v-show="yShow && y1Offset !== 1"
+      )
+      .bg-gray-400.border-2.border-black.face.splitter.iz0(
+        v-show="zShow && z0Offset !== 1"
+      )
+      .bg-gray-400.border-2.border-black.face.splitter.iz1(
+        v-show="zShow && z1Offset !== 1"
+      )
       .face.base(style="--i: 1"): .top.frame
         canvas.split.top0(ref="topSplit0")
         canvas.split.middle.top1(ref="topSplit1")
@@ -72,9 +96,9 @@ class Face {
   data: Color[];
   editedIndexes: number[] = [];
   ctx: CanvasRenderingContext2D;
-  ocanvas: HTMLCanvasElement
+  ocanvas: HTMLCanvasElement;
   octx: CanvasRenderingContext2D;
-  rot: 0 | 1 | 2 | 3 = 0
+  rot: 0 | 1 | 2 | 3 = 0;
   constructor(
     public canvas: HTMLCanvasElement,
     public splits: HTMLCanvasElement[],
@@ -82,13 +106,11 @@ class Face {
     initialColor: Color,
   ) {
     this.data = Array<number>(size ** 2).fill(initialColor);
-    this.data = this.data.map(() => Math.floor(Math.random() * 6)) // TODO:
     this.ctx = canvas.getContext("2d")!;
     this.ctx.fillStyle = i2color[initialColor];
     this.ctx.fillRect(0, 0, canvas.width, canvas.height);
-    this.ocanvas = document.createElement("canvas")
-    this.octx = this.ocanvas.getContext("2d")!
-    this.forceRender() // TODO:
+    this.ocanvas = document.createElement("canvas");
+    this.octx = this.ocanvas.getContext("2d")!;
     this.render(1, 1, 0);
   }
   forceRender() {
@@ -104,7 +126,6 @@ class Face {
         );
       }
     }
-
   }
   getIndexAt(x: number, y: number) {
     switch (this.rot) {
@@ -118,48 +139,39 @@ class Face {
         return this.size - y - 1 + this.size * x;
     }
   }
-  getCoordAt(x: number, y: number) {
-    switch (this.rot) {
-      case 0:
-        return [x, y];
-      case 1:
-        return [y, this.size - x - 1];
-      case 2:
-        return [this.size - x - 1, this.size - y - 1];
-      case 3:
-        return [this.size - y - 1, x];
-    }
-  }
   getAt(x: number, y: number) {
     return this.data[this.getIndexAt(x, y)];
   }
   setAt(x: number, y: number, v: Color) {
     const i = this.getIndexAt(x, y);
     this.data[i] = v;
-    const [coordX, coordY] = this.getCoordAt(x, y);
     const pixelSize = this.canvas.width / this.size;
     this.ctx.fillStyle = i2color[v];
     this.ctx.fillRect(
-      coordX * pixelSize,
-      coordY * pixelSize,
+      x * pixelSize,
+      y * pixelSize,
       pixelSize,
       pixelSize,
     );
   }
   rotate(amount: 1 | 2 | 3) {
-    this.rot = (this.rot + amount) % 4 as 0 | 1 | 2 | 3
-    this.octx.save()
-    this.octx.translate(this.canvas.width / 2, this.canvas.height / 2)
-    this.octx.rotate(Math.PI * .5 * amount)
-    this.octx.drawImage(this.canvas, -this.canvas.width / 2, -this.canvas.height / 2)
-    this.octx.restore()
-    this.ctx.drawImage(this.ocanvas, 0, 0)
+    this.rot = ((this.rot + amount) % 4) as 0 | 1 | 2 | 3;
+    this.octx.save();
+    this.octx.translate(this.canvas.width / 2, this.canvas.height / 2);
+    this.octx.rotate(Math.PI * 0.5 * amount);
+    this.octx.drawImage(
+      this.canvas,
+      -this.canvas.width / 2,
+      -this.canvas.height / 2,
+    );
+    this.octx.restore();
+    this.ctx.drawImage(this.ocanvas, 0, 0);
   }
   render(offset0: number, offset1: number, axis: 0 | 1, inv = false) {
-    const h = this.size
-    const w0 = Math.floor(Math.abs((1 - offset0 + .001) * .5 * this.size))
-    const w2 = Math.floor(Math.abs((1 - offset1 + .001) * .5 * this.size))
-    const w1 = this.size - w0 - w2
+    const h = this.size;
+    const w0 = Math.floor(Math.abs((1 - offset0 + 0.001) * 0.5 * this.size));
+    const w2 = Math.floor(Math.abs((1 - offset1 + 0.001) * 0.5 * this.size));
+    const w1 = this.size - w0 - w2;
     if (axis === 0) {
       this.splits[0].width = w0;
       this.splits[1].width = w1;
@@ -171,13 +183,13 @@ class Face {
       const ctx1 = this.splits[1].getContext("2d")!;
       const ctx2 = this.splits[2].getContext("2d")!;
       if (inv) {
-        ctx0.drawImage(this.canvas, 0, 0)
-        ctx1.drawImage(this.canvas, -w0, 0)
-        ctx2.drawImage(this.canvas, -(w0 + w1), 0)
+        ctx0.drawImage(this.canvas, 0, 0);
+        ctx1.drawImage(this.canvas, -w0, 0);
+        ctx2.drawImage(this.canvas, -(w0 + w1), 0);
       } else {
-        ctx0.drawImage(this.canvas, -(w2 + w1), 0)
-        ctx1.drawImage(this.canvas, -w2, 0)
-        ctx2.drawImage(this.canvas, 0, 0)
+        ctx0.drawImage(this.canvas, -(w2 + w1), 0);
+        ctx1.drawImage(this.canvas, -w2, 0);
+        ctx2.drawImage(this.canvas, 0, 0);
       }
     } else {
       this.splits[2].width = h;
@@ -190,13 +202,13 @@ class Face {
       const ctx1 = this.splits[1].getContext("2d")!;
       const ctx2 = this.splits[2].getContext("2d")!;
       if (inv) {
-        ctx2.drawImage(this.canvas, 0, 0)
-        ctx1.drawImage(this.canvas, 0, -w0)
-        ctx0.drawImage(this.canvas, 0, -(w0 + w1))
+        ctx2.drawImage(this.canvas, 0, 0);
+        ctx1.drawImage(this.canvas, 0, -w0);
+        ctx0.drawImage(this.canvas, 0, -(w0 + w1));
       } else {
-        ctx2.drawImage(this.canvas, 0, -(w2 + w1))
-        ctx1.drawImage(this.canvas, 0, -w2)
-        ctx0.drawImage(this.canvas, 0, 0)
+        ctx2.drawImage(this.canvas, 0, -(w2 + w1));
+        ctx1.drawImage(this.canvas, 0, -w2);
+        ctx0.drawImage(this.canvas, 0, 0);
       }
     }
   }
@@ -208,7 +220,7 @@ class Cube {
   back: Face;
   top: Face;
   bottom: Face;
-  animationSpeed = 200;
+  animationSpeed = 1000;
   constructor(
     canvases: HTMLCanvasElement[],
     splits: HTMLCanvasElement[],
@@ -239,11 +251,11 @@ class Cube {
   }
   async rotate(axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3) {
     if (this.animationSpeed) {
-      let rotator: Ref<number>
+      let rotator: Ref<number>;
       await new Promise<void>((resolve) => {
         const offset0 = ((end + 1) / this.size) * 2 - 1;
         const offset1 = (start / this.size) * -2 + 1;
-        this.animParams.rotAxis.value = axis + 1 as 1 | 2 | 3
+        this.animParams.rotAxis.value = (axis + 1) as 1 | 2 | 3;
         switch (axis) {
           case 0:
             this.animParams.x0Offset.value = offset0;
@@ -254,8 +266,8 @@ class Cube {
             this.back.render(1, 1, 0);
             this.top.render(offset0, offset1, 1);
             this.bottom.render(offset0, offset1, 1, true);
-            rotator = this.animParams.xRot
-            break
+            rotator = this.animParams.xRot;
+            break;
           case 1:
             this.animParams.y0Offset.value = offset0;
             this.animParams.y1Offset.value = offset1;
@@ -265,8 +277,8 @@ class Cube {
             this.back.render(offset1, offset0, 1);
             this.top.render(1, 1, 0);
             this.bottom.render(1, 1, 0);
-            rotator = this.animParams.yRot
-            break
+            rotator = this.animParams.yRot;
+            break;
           case 2:
             this.animParams.z0Offset.value = offset0;
             this.animParams.z1Offset.value = offset1;
@@ -276,24 +288,95 @@ class Cube {
             this.back.render(offset1, offset0, 0);
             this.top.render(offset1, offset0, 0, true);
             this.bottom.render(offset1, offset0, 0, true);
-            rotator = this.animParams.zRot
+            rotator = this.animParams.zRot;
         }
-        let startTime = Date.now()
+        let startTime = Date.now();
         const animTime = amount === 2 ? 2 : 1;
         const frame = () => {
-          rotator.value = (Date.now() - startTime) / this.animationSpeed * 90 * (amount === 3 ? -1 : 1)
-          startTime + this.animationSpeed * animTime > Date.now() ? requestAnimationFrame(frame) : resolve()
-        }
-        frame()
-      })
-      rotator!.value = 0
+          rotator.value =
+            ((Date.now() - startTime) / this.animationSpeed) *
+            90 *
+            (amount === 3 ? -1 : 1);
+          startTime + this.animationSpeed * animTime > Date.now()
+            ? requestAnimationFrame(frame)
+            : resolve();
+        };
+        frame();
+      });
+      rotator!.value = 0;
       this.animParams.x0Offset.value = 1;
       this.animParams.x1Offset.value = 1;
       this.animParams.y0Offset.value = 1;
       this.animParams.y1Offset.value = 1;
       this.animParams.z0Offset.value = 1;
       this.animParams.z1Offset.value = 1;
-
+    }
+    if (start === 0) {
+      [this.back, this.bottom, this.left][axis].rotate(
+        (4 - amount) as 1 | 2 | 3,
+      );
+    }
+    if (end === this.size - 1) {
+      [this.front, this.top, this.right][axis].rotate(amount);
+    }
+    for (let j = start; j < end + 1; j++) {
+      const elements: number[][] = [
+        () => {
+          const ret: number[][] = [[], [], [], []];
+          for (let k = 0; k < this.size; k++) {
+            ret[0][k] = this.top.getAt(k, j)
+            ret[1][k] = this.right.getAt(this.size - j - 1, k)
+            ret[2][k] = this.bottom.getAt(this.size - k - 1, this.size - j - 1)
+            ret[3][k] = this.left.getAt(j, this.size - k - 1)
+          }
+          return ret;
+        },
+        () => {
+          const ret: number[][] = [[], [], [], []]
+          for (let k = 0; k < this.size; k++) {
+            ret[0][k] = this.front.getAt(k, this.size - j - 1)
+            ret[1][k] = this.left.getAt(k, this.size - j - 1)
+            ret[2][k] = this.back.getAt(k, this.size - j - 1)
+            ret[3][k] = this.right.getAt(k, this.size - j - 1)
+          }
+          return ret;
+        },
+        () => {
+          const ret: number[][] = [[], [], [], []]
+          for (let k = 0; k < this.size; k++) {
+            ret[0][k] = this.front.getAt(j, k,)
+            ret[1][k] = this.top.getAt(j, k)
+            ret[2][k] = this.back.getAt(this.size - j - 1, this.size - k - 1)
+            ret[3][k] = this.bottom.getAt(j, k)
+          }
+          return ret;
+        },
+      ][axis]();
+      for (let i = 0; i < amount; i++) {
+        elements.unshift(elements.pop()!);
+      }
+      [() => {
+        for (let k = 0; k < this.size; k++) {
+          this.top.setAt(k, j, elements[0][k])
+          this.right.setAt(this.size - j - 1, k, elements[1][k])
+          this.bottom.setAt(this.size - k - 1, this.size - j - 1, elements[2][k])
+          this.left.setAt(j, this.size - k - 1, elements[3][k])
+        }
+      }, () => {
+        for (let k = 0; k < this.size; k++) {
+          this.front.setAt(k, this.size - j - 1, elements[0][k])
+          this.left.setAt(k, this.size - j - 1, elements[1][k])
+          this.back.setAt(k, this.size - j - 1, elements[2][k])
+          this.right.setAt(k, this.size - j - 1, elements[3][k])
+        }
+      }, () => {
+        for (let k = 0; k < this.size; k++) {
+          this.front.setAt(j, k, elements[0][k])
+          this.top.setAt(j, k, elements[1][k])
+          this.back.setAt(this.size - j - 1, this.size - k - 1, elements[2][k])
+          this.bottom.setAt(j, k, elements[3][k])
+        }
+      }][axis]();
     }
   }
 }
@@ -349,10 +432,18 @@ const leftZRot = computed(() =>
 );
 const topTop = computed(() => (1 - x1Offset.value) * 25 + "vmin");
 const topLeft = computed(() => (1 - z1Offset.value) * 25 + "vmin");
-const topTopAxis = computed(() => (rotAxis.value === 3 ? 2 : (1 - x1Offset.value)) * 25 + "vmin");
-const topBottomAxis = computed(() => (rotAxis.value === 3 ? 2 : (1 - x0Offset.value)) * 25 + "vmin");
-const topLeftAxis = computed(() => (rotAxis.value === 1 ? 2 : (1 - z1Offset.value)) * 25 + "vmin");
-const topRightAxis = computed(() => (rotAxis.value === 1 ? 2 : (1 - z0Offset.value)) * 25 + "vmin");
+const topTopAxis = computed(
+  () => (rotAxis.value === 3 ? 2 : 1 - x1Offset.value) * 25 + "vmin",
+);
+const topBottomAxis = computed(
+  () => (rotAxis.value === 3 ? 2 : 1 - x0Offset.value) * 25 + "vmin",
+);
+const topLeftAxis = computed(
+  () => (rotAxis.value === 1 ? 2 : 1 - z1Offset.value) * 25 + "vmin",
+);
+const topRightAxis = computed(
+  () => (rotAxis.value === 1 ? 2 : 1 - z0Offset.value) * 25 + "vmin",
+);
 const topWidth = computed(
   () => (z0Offset.value + z1Offset.value) * 25 + "vmin",
 );
@@ -361,10 +452,18 @@ const topHeight = computed(
 );
 const frontTop = computed(() => (1 - y0Offset.value) * 25 + "vmin");
 const frontLeft = computed(() => (1 - z1Offset.value) * 25 + "vmin");
-const frontTopAxis = computed(() => (rotAxis.value === 3 ? 2 : (1 - y0Offset.value)) * 25 + "vmin");
-const frontBottomAxis = computed(() => (rotAxis.value === 3 ? 2 : (1 - y1Offset.value)) * 25 + "vmin");
-const frontLeftAxis = computed(() => (rotAxis.value === 2 ? 2 : (1 - z1Offset.value)) * 25 + "vmin");
-const frontRightAxis = computed(() => (rotAxis.value === 2 ? 2 : (1 - z0Offset.value)) * 25 + "vmin");
+const frontTopAxis = computed(
+  () => (rotAxis.value === 3 ? 2 : 1 - y0Offset.value) * 25 + "vmin",
+);
+const frontBottomAxis = computed(
+  () => (rotAxis.value === 3 ? 2 : 1 - y1Offset.value) * 25 + "vmin",
+);
+const frontLeftAxis = computed(
+  () => (rotAxis.value === 2 ? 2 : 1 - z1Offset.value) * 25 + "vmin",
+);
+const frontRightAxis = computed(
+  () => (rotAxis.value === 2 ? 2 : 1 - z0Offset.value) * 25 + "vmin",
+);
 const frontWidth = computed(
   () => (z0Offset.value + z1Offset.value) * 25 + "vmin",
 );
@@ -373,10 +472,18 @@ const frontHeight = computed(
 );
 const rightTop = computed(() => (1 - y0Offset.value) * 25 + "vmin");
 const rightLeft = computed(() => (1 - x0Offset.value) * 25 + "vmin");
-const rightTopAxis = computed(() => (rotAxis.value === 1 ? 2 : (1 - y0Offset.value)) * 25 + "vmin");
-const rightBottomAxis = computed(() => (rotAxis.value === 1 ? 2 : (1 - y1Offset.value)) * 25 + "vmin");
-const rightLeftAxis = computed(() => (rotAxis.value === 2 ? 2 : (1 - x0Offset.value)) * 25 + "vmin");
-const rightRightAxis = computed(() => (rotAxis.value === 2 ? 2 : (1 - x1Offset.value)) * 25 + "vmin");
+const rightTopAxis = computed(
+  () => (rotAxis.value === 1 ? 2 : 1 - y0Offset.value) * 25 + "vmin",
+);
+const rightBottomAxis = computed(
+  () => (rotAxis.value === 1 ? 2 : 1 - y1Offset.value) * 25 + "vmin",
+);
+const rightLeftAxis = computed(
+  () => (rotAxis.value === 2 ? 2 : 1 - x0Offset.value) * 25 + "vmin",
+);
+const rightRightAxis = computed(
+  () => (rotAxis.value === 2 ? 2 : 1 - x1Offset.value) * 25 + "vmin",
+);
 const rightWidth = computed(
   () => (x0Offset.value + x1Offset.value) * 25 + "vmin",
 );
@@ -420,7 +527,7 @@ const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 onMounted(async () => {
-  const size = 12
+  const size = 12;
   const cube = new Cube(
     [
       front.value!,
@@ -468,15 +575,14 @@ onMounted(async () => {
     const axis = Math.floor(Math.random() * 3) as 0 | 1 | 2
     const start = Math.floor(Math.random() * size)
     const end = Math.floor(Math.random() * (size - start - 1)) + start
-    const amount = Math.floor(Math.random() * 3) + 1 as 1 | 2 | 3
-    await cube.rotate(axis, start, end, amount)
+    const amount = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
+    await cube.rotate(axis, start, end, amount);
   }
-
 });
-let running = true
+let running = true;
 onUnmounted(() => {
-  running = false
-})
+  running = false;
+});
 </script>
 <style scoped lang="scss">
 .scene {
@@ -528,31 +634,31 @@ onUnmounted(() => {
 }
 
 .z1 {
-  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin)) rotate(v-bind(zRotDegMinus))
+  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin)) rotate(v-bind(zRotDegMinus));
 }
 
 .ix0 {
-  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin))
+  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin));
 }
 
 .ix1 {
-  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin))
+  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin));
 }
 
 .iy0 {
-  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin))
+  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin));
 }
 
 .iy1 {
-  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin))
+  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin));
 }
 
 .iz0 {
-  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin))
+  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin));
 }
 
 .iz1 {
-  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin))
+  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin));
 }
 
 .split {
