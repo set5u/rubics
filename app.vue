@@ -72,6 +72,7 @@ class Face {
   data: Color[];
   editedIndexes: number[] = [];
   ctx: CanvasRenderingContext2D;
+  rot: 0 | 1 | 2 | 3 = 0
   constructor(
     public canvas: HTMLCanvasElement,
     public splits: HTMLCanvasElement[],
@@ -102,10 +103,28 @@ class Face {
 
   }
   getIndexAt(x: number, y: number) {
-    return x + this.size * y;
+    switch (this.rot) {
+      case 0:
+        return x + this.size * y;
+      case 1:
+        return y + this.size * (this.size - x - 1);
+      case 2:
+        return this.size - x - 1 + this.size * (this.size - y - 1);
+      case 3:
+        return this.size - y - 1 + this.size * x;
+    }
   }
   getCoordAt(x: number, y: number) {
-    return [x, y];
+    switch (this.rot) {
+      case 0:
+        return [x, y];
+      case 1:
+        return [y, this.size - x - 1];
+      case 2:
+        return [this.size - x - 1, this.size - y - 1];
+      case 3:
+        return [this.size - y - 1, x];
+    }
   }
   getAt(x: number, y: number) {
     return this.data[this.getIndexAt(x, y)];
@@ -188,10 +207,9 @@ class Cube {
     },
     public size: number,
   ) {
-    const newSize = Math.floor(1024 / size) * size
     canvases.forEach((c) => {
-      c.width = newSize;
-      c.height = newSize;
+      c.width = size;
+      c.height = size;
     });
     this.front = new Face(canvases[0], splits.slice(0, 3), size, Color.R);
     this.right = new Face(canvases[1], splits.slice(3, 6), size, Color.G);
@@ -467,6 +485,7 @@ onMounted(() => {
 
 .split {
   position: absolute;
+  image-rendering: pixelated;
 }
 
 .frame {
