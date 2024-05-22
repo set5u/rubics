@@ -1,5 +1,5 @@
 <template lang="pug">
-.h-full
+.h-full(@pointer-down.prevent)
   .hidden
     canvas(ref="top")
     canvas(ref="bottom")
@@ -7,10 +7,7 @@
     canvas(ref="right")
     canvas(ref="back")
     canvas(ref="left")
-  .h-full.flex.justify-center.items-center.scene.overflow-hidden(
-    @pointerdown.capture="lock",
-    @pointerup="unlock"
-  )
+  .h-full.flex.justify-center.items-center.scene.overflow-hidden
     .cube
       .bg-gray-400.border-2.border-black.face.splitter.x0(v-show="xShow")
       .bg-gray-400.border-2.border-black.face.splitter.x1(v-show="xShow")
@@ -62,14 +59,13 @@
         canvas.split.left2(ref="leftSplit2")
 </template>
 <script setup lang="ts">
-const { x, y } = useMouse({ type: "movement" });
+const { x, y, pressure } = usePointer();
 const rotY = ref(45);
 const rotX = ref(-45);
-const { lock, unlock, element } = usePointerLock();
-watch([x, y], ([x, y]) => {
-  if (!element.value) return;
-  rotY.value += x / 2;
-  rotX.value -= y / 2;
+watch([x, y], ([x, y], [ox, oy]) => {
+  if (!pressure.value) return
+  rotY.value += (x - ox) / 2;
+  rotX.value -= (y - oy) / 2;
 });
 enum Color {
   R,
