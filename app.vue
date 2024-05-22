@@ -65,7 +65,7 @@ const i2color = ["red", "lime", "blue", "yellow", "white", "orange"] as const;
 class Face {
   data: Color[];
   editedIndexes: number[] = [];
-  rotate: 0 | 1 | 2 | 3 = 0;
+  rotate: Ref<0 | 1 | 2 | 3> = ref(0);
   ctx: CanvasRenderingContext2D;
   constructor(
     public canvas: HTMLCanvasElement,
@@ -80,7 +80,7 @@ class Face {
     this.render(1, 1, 0);
   }
   getIndexAt(x: number, y: number) {
-    switch (this.rotate) {
+    switch (this.rotate.value) {
       case 0:
         return x + this.size * y;
       case 1:
@@ -92,7 +92,7 @@ class Face {
     }
   }
   getCoordAt(x: number, y: number) {
-    switch (this.rotate) {
+    switch (this.rotate.value) {
       case 0:
         return [x, y];
       case 1:
@@ -120,7 +120,7 @@ class Face {
     );
   }
   render(offset0: number, offset1: number, axis: 0 | 1) {
-    const rotate = (this.rotate + axis) % 4;
+    const rotate = (this.rotate.value + axis) % 4;
     const pos0 = axis ? offset0 * 0.5 + 0.5 : -offset1 * 0.5 + 0.5;
     const pos1 = axis ? -offset1 * 0.5 + 0.5 : offset0 * 0.5 + 0.5;
     const w = this.canvas.width;
@@ -164,6 +164,7 @@ class Cube {
   back: Face;
   top: Face;
   bottom: Face;
+  animationSpeed = 1;
   constructor(
     canvases: HTMLCanvasElement[],
     splits: HTMLCanvasElement[],
@@ -179,7 +180,7 @@ class Cube {
       yRot: Ref<number>;
       zRot: Ref<number>;
     },
-    size: number,
+    public size: number,
   ) {
     canvases.forEach((c) => {
       c.width = Math.max(size, 1024);
@@ -191,6 +192,23 @@ class Cube {
     this.back = new Face(canvases[3], splits.slice(9, 12), size, Color.O);
     this.top = new Face(canvases[4], splits.slice(12, 15), size, Color.Y);
     this.bottom = new Face(canvases[5], splits.slice(15, 18), size, Color.W);
+  }
+  rotate(axis: 0 | 1 | 2, start: number, end: number, amount: number) {
+    if (this.animationSpeed) {
+      const offset0 = (end / this.size) * 2 - 1;
+      const offset1 = (start / this.size) * -2 + 1;
+      switch (axis) {
+        case 0:
+          this.animParams.x0Offset.value = offset0;
+          this.animParams.x1Offset.value = offset1;
+          this.front.render(1, 1, 0);
+          this.right.render(offset0, offset1, 0);
+          this.left.render(offset0, offset1, 0);
+          this.back.render(1, 1, 0);
+          this.top.render(offset0, offset1, 0);
+          this.bottom.render(offset0, offset1, 0);
+      }
+    }
   }
 }
 const front = ref<HTMLCanvasElement>();
@@ -309,6 +327,25 @@ const backSplit2 = ref<HTMLCanvasElement>();
 const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
+let cubeRef = shallowRef<Cube>();
+let topRotate = computed(
+  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
+);
+let bottomRotate = computed(
+  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
+);
+let frontRotate = computed(
+  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
+);
+let rightRotate = computed(
+  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
+);
+let backRotate = computed(
+  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
+);
+let leftRotate = computed(
+  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
+);
 onMounted(() => {
   const cube = new Cube(
     [
@@ -353,6 +390,8 @@ onMounted(() => {
     },
     5,
   );
+  cubeRef.value = cube;
+  cube.rotate(0, 1, 3, 1);
 });
 </script>
 <style scoped lang="scss">
@@ -430,7 +469,7 @@ onMounted(() => {
 }
 
 .top {
-  transform: rotate(v-bind(topZRot));
+  transform: rotate(v-bind(topRotate)) rotate(v-bind(topZRot));
 }
 
 .top0 {
@@ -458,7 +497,7 @@ onMounted(() => {
 }
 
 .bottom {
-  transform: rotate(v-bind(bottomZRot));
+  transform: rotate(v-bind(bottomRotate)) rotate(v-bind(bottomZRot));
 }
 
 .bottom0 {
@@ -486,7 +525,7 @@ onMounted(() => {
 }
 
 .front {
-  transform: rotate(v-bind(frontZRot));
+  transform: rotate(v-bind(frontRotate)) rotate(v-bind(frontZRot));
 }
 
 .front0 {
@@ -518,7 +557,7 @@ onMounted(() => {
 }
 
 .right {
-  transform: rotate(v-bind(rightZRot));
+  transform: rotate(v-bind(rightRotate)) rotate(v-bind(rightZRot));
 }
 
 .right0 {
@@ -550,7 +589,7 @@ onMounted(() => {
 }
 
 .back {
-  transform: rotate(v-bind(backZRot));
+  transform: rotate(v-bind(backRotate)) rotate(v-bind(backZRot));
 }
 
 .back0 {
@@ -582,7 +621,7 @@ onMounted(() => {
 }
 
 .left {
-  transform: rotate(v-bind(leftZRot));
+  transform: rotate(v-bind(leftRotate)) rotate(v-bind(leftZRot));
 }
 
 .left0 {
