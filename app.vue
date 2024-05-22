@@ -18,6 +18,12 @@
       .bg-gray-400.face.splitter.y1(v-show="yShow")
       .bg-gray-400.face.splitter.z0(v-show="zShow")
       .bg-gray-400.face.splitter.z1(v-show="zShow")
+      .bg-gray-400.face.splitter.ix0(v-show="xShow")
+      .bg-gray-400.face.splitter.ix1(v-show="xShow")
+      .bg-gray-400.face.splitter.iy0(v-show="yShow")
+      .bg-gray-400.face.splitter.iy1(v-show="yShow")
+      .bg-gray-400.face.splitter.iz0(v-show="zShow")
+      .bg-gray-400.face.splitter.iz1(v-show="zShow")
       .face.base(style="--i: 1"): .top.frame
         canvas.split.top0(ref="topSplit0")
         canvas.split.middle.top1(ref="topSplit1")
@@ -65,7 +71,6 @@ const i2color = ["red", "lime", "blue", "yellow", "white", "orange"] as const;
 class Face {
   data: Color[];
   editedIndexes: number[] = [];
-  rotate: Ref<0 | 1 | 2 | 3> = ref(0);
   ctx: CanvasRenderingContext2D;
   constructor(
     public canvas: HTMLCanvasElement,
@@ -74,34 +79,33 @@ class Face {
     initialColor: Color,
   ) {
     this.data = Array<number>(size ** 2).fill(initialColor);
+    this.data = this.data.map(() => Math.floor(Math.random() * 6)) // TODO:
     this.ctx = canvas.getContext("2d")!;
     this.ctx.fillStyle = i2color[initialColor];
     this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+    this.forceRender() // TODO:
     this.render(1, 1, 0);
   }
-  getIndexAt(x: number, y: number) {
-    switch (this.rotate.value) {
-      case 0:
-        return x + this.size * y;
-      case 1:
-        return y + this.size * (this.size - x - 1);
-      case 2:
-        return this.size - x - 1 + this.size * (this.size - y - 1);
-      case 3:
-        return this.size - y - 1 + this.size * x;
+  forceRender() {
+    const pixelSize = this.canvas.width / this.size;
+    for (let coordX = 0; coordX < this.size; coordX++) {
+      for (let coordY = 0; coordY < this.size; coordY++) {
+        this.ctx.fillStyle = i2color[this.data[coordX + coordY * this.size]];
+        this.ctx.fillRect(
+          coordX * pixelSize,
+          coordY * pixelSize,
+          pixelSize,
+          pixelSize,
+        );
+      }
     }
+
+  }
+  getIndexAt(x: number, y: number) {
+    return x + this.size * y;
   }
   getCoordAt(x: number, y: number) {
-    switch (this.rotate.value) {
-      case 0:
-        return [x, y];
-      case 1:
-        return [y, this.size - x - 1];
-      case 2:
-        return [this.size - x - 1, this.size - y - 1];
-      case 3:
-        return [this.size - y - 1, x];
-    }
+    return [x, y];
   }
   getAt(x: number, y: number) {
     return this.data[this.getIndexAt(x, y)];
@@ -120,28 +124,28 @@ class Face {
     );
   }
   render(offset0: number, offset1: number, axis: 0 | 1) {
-    const rotate = (this.rotate.value + axis) % 4;
-    const pos0 = axis ? offset0 * 0.5 + 0.5 : -offset1 * 0.5 + 0.5;
-    const pos1 = axis ? -offset1 * 0.5 + 0.5 : offset0 * 0.5 + 0.5;
-    const h = this.canvas.width
-    const w = this.canvas.width / (1 + pos0 + pos1);
+    const rotate = axis
+    const pos0 = -offset1 * 0.5 + 0.5;
+    const pos1 = offset0 * 0.5 + 0.5;
+    const h = this.canvas.height;
+    const w = this.canvas.width;
     const w0 = Math.floor(w * pos0);
     const w1 = Math.floor(w * pos1);
     const m = Math.abs(w0 - w1);
     const iw1 = w - w1;
-    if (rotate === 0 || rotate === 2) {
+    if (rotate === 0) {
       this.splits[0].width = w0;
       this.splits[1].width = m;
       this.splits[2].width = iw1;
       this.splits[0].height = h;
       this.splits[1].height = h;
       this.splits[2].height = h;
-      const ctx0 = this.splits[0].getContext("2d")!;
+      const ctx0 = this.splits[rotate].getContext("2d")!;
       const ctx1 = this.splits[1].getContext("2d")!;
-      const ctx2 = this.splits[2].getContext("2d")!;
+      const ctx2 = this.splits[2 - rotate].getContext("2d")!;
       ctx0.drawImage(this.canvas, 0, 0, w0, h, 0, 0, w0, h);
       ctx1.drawImage(this.canvas, w0, 0, m, h, 0, 0, m, h);
-      ctx2.drawImage(this.canvas, w1, 0, iw1, h, 0, 0, iw1, h);
+      ctx2.drawImage(this.canvas, w1, 0, w1, h, 0, 0, w1, h);
     } else {
       this.splits[0].width = h;
       this.splits[1].width = h;
@@ -149,9 +153,9 @@ class Face {
       this.splits[0].height = w0;
       this.splits[1].height = m;
       this.splits[2].height = iw1;
-      const ctx0 = this.splits[0].getContext("2d")!;
+      const ctx0 = this.splits[rotate - 1].getContext("2d")!;
       const ctx1 = this.splits[1].getContext("2d")!;
-      const ctx2 = this.splits[2].getContext("2d")!;
+      const ctx2 = this.splits[3 - rotate].getContext("2d")!;
       ctx0.drawImage(this.canvas, 0, 0, h, w0, 0, 0, h, w0);
       ctx1.drawImage(this.canvas, 0, w0, h, m, 0, 0, h, m);
       ctx2.drawImage(this.canvas, 0, w1, h, iw1, 0, 0, h, iw1);
@@ -183,9 +187,10 @@ class Cube {
     },
     public size: number,
   ) {
+    const newSize = Math.floor(1024 / size + 1) * size
     canvases.forEach((c) => {
-      c.width = Math.max(size, 1024);
-      c.height = Math.max(size, 1024);
+      c.width = newSize;
+      c.height = newSize;
     });
     this.front = new Face(canvases[0], splits.slice(0, 3), size, Color.R);
     this.right = new Face(canvases[1], splits.slice(3, 6), size, Color.G);
@@ -204,8 +209,8 @@ class Cube {
           this.animParams.x0Offset.value = offset0;
           this.animParams.x1Offset.value = offset1;
           this.front.render(1, 1, 0);
-          this.right.render(offset0, offset1, 0);
-          this.left.render(offset0, offset1, 0);
+          this.right.render(offset1, offset0, 0);
+          this.left.render(offset1, offset0, 0);
           this.back.render(1, 1, 0);
           this.top.render(offset0, offset1, 1);
           this.bottom.render(offset0, offset1, 1);
@@ -236,7 +241,7 @@ const rotAxis: Ref<0 | 1 | 2 | 3> = ref(0);
 const xShow = computed(() => rotAxis.value === 1);
 const yShow = computed(() => rotAxis.value === 2);
 const zShow = computed(() => rotAxis.value === 3);
-const xRot = ref(0);
+const xRot = ref(16);
 const yRot = ref(0);
 const zRot = ref(0);
 const xRotDeg = computed(() => xRot.value + "deg");
@@ -336,24 +341,6 @@ const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 let cubeRef = shallowRef<Cube>();
-let topRotate = computed(
-  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
-);
-let bottomRotate = computed(
-  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
-);
-let frontRotate = computed(
-  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
-);
-let rightRotate = computed(
-  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
-);
-let backRotate = computed(
-  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
-);
-let leftRotate = computed(
-  () => (cubeRef.value?.top.rotate.value || 0) * 90 + "deg",
-);
 onMounted(() => {
   const cube = new Cube(
     [
@@ -452,7 +439,31 @@ onMounted(() => {
 }
 
 .z1 {
-  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin)) rotate(v-bind(zRotDegMinus));
+  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin))
+}
+
+.ix0 {
+  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin))
+}
+
+.ix1 {
+  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin))
+}
+
+.iy0 {
+  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin))
+}
+
+.iy1 {
+  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin))
+}
+
+.iz0 {
+  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin))
+}
+
+.iz1 {
+  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin))
 }
 
 .split {
@@ -470,7 +481,7 @@ onMounted(() => {
 }
 
 .top {
-  transform: rotate(v-bind(topRotate)) rotate(v-bind(topZRot));
+  transform: rotate(v-bind(topZRot));
 }
 
 .top0 {
@@ -496,7 +507,7 @@ onMounted(() => {
 }
 
 .bottom {
-  transform: rotate(v-bind(bottomRotate)) rotate(v-bind(bottomZRot));
+  transform: rotate(v-bind(bottomZRot));
 }
 
 .bottom0 {
@@ -522,7 +533,7 @@ onMounted(() => {
 }
 
 .front {
-  transform: rotate(v-bind(frontRotate)) rotate(v-bind(frontZRot));
+  transform: rotate(v-bind(frontZRot));
 }
 
 .front0 {
@@ -550,7 +561,7 @@ onMounted(() => {
 }
 
 .right {
-  transform: rotate(v-bind(rightRotate)) rotate(v-bind(rightZRot));
+  transform: rotate(v-bind(rightZRot));
 }
 
 .right0 {
@@ -578,7 +589,7 @@ onMounted(() => {
 }
 
 .back {
-  transform: rotate(v-bind(backRotate)) rotate(v-bind(backZRot));
+  transform: rotate(v-bind(backZRot));
 }
 
 .back0 {
@@ -606,7 +617,7 @@ onMounted(() => {
 }
 
 .left {
-  transform: rotate(v-bind(leftRotate)) rotate(v-bind(leftZRot));
+  transform: rotate(v-bind(leftZRot));
 }
 
 .left0 {
