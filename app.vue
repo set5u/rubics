@@ -8,16 +8,16 @@
     canvas(ref="back")
     canvas(ref="left")
   .h-full.flex.justify-center.items-center.scene.overflow-hidden(
-    @mousedown.self.capture="lock",
-    @mouseup.self="unlock"
+    @mousedown.capture="lock",
+    @mouseup="unlock"
   )
     .cube
-      .bg-gray-400.border-2.border-black.face.splitter.x0(v-show="xShow")
-      .bg-gray-400.border-2.border-black.face.splitter.x1(v-show="xShow")
-      .bg-gray-400.border-2.border-black.face.splitter.y0(v-show="yShow")
-      .bg-gray-400.border-2.border-black.face.splitter.y1(v-show="yShow")
-      .bg-gray-400.border-2.border-black.face.splitter.z0(v-show="zShow")
-      .bg-gray-400.border-2.border-black.face.splitter.z1(v-show="zShow")
+      .bg-gray-400.border-2.border-black.face.splitter.x0(v-show="xShow && x0Offset !== 1")
+      .bg-gray-400.border-2.border-black.face.splitter.x1(v-show="xShow && x1Offset !== 1")
+      .bg-gray-400.border-2.border-black.face.splitter.y0(v-show="yShow && y0Offset !== 1")
+      .bg-gray-400.border-2.border-black.face.splitter.y1(v-show="yShow && y1Offset !== 1")
+      .bg-gray-400.border-2.border-black.face.splitter.z0(v-show="zShow && z1Offset !== 1")
+      .bg-gray-400.border-2.border-black.face.splitter.z1(v-show="zShow && z0Offset !== 1")
       .bg-gray-400.border-2.border-black.face.splitter.ix0(v-show="xShow && x0Offset !== 1")
       .bg-gray-400.border-2.border-black.face.splitter.ix1(v-show="xShow && x1Offset !== 1")
       .bg-gray-400.border-2.border-black.face.splitter.iy0(v-show="yShow && y0Offset !== 1")
@@ -72,6 +72,8 @@ class Face {
   data: Color[];
   editedIndexes: number[] = [];
   ctx: CanvasRenderingContext2D;
+  ocanvas: HTMLCanvasElement
+  octx: CanvasRenderingContext2D;
   rot: 0 | 1 | 2 | 3 = 0
   constructor(
     public canvas: HTMLCanvasElement,
@@ -84,6 +86,8 @@ class Face {
     this.ctx = canvas.getContext("2d")!;
     this.ctx.fillStyle = i2color[initialColor];
     this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+    this.ocanvas = document.createElement("canvas")
+    this.octx = this.ocanvas.getContext("2d")!
     this.forceRender() // TODO:
     this.render(1, 1, 0);
   }
@@ -142,43 +146,58 @@ class Face {
       pixelSize,
     );
   }
-  rotate(amount: 1 | 2 | 3) { }
-  render(offset0: number, offset1: number, axis: 0 | 1) {
-    const rotate = axis
-    const pos0 = -offset1 * 0.5 + 0.5;
-    const pos1 = offset0 * 0.5 + 0.5;
-    const h = this.canvas.height;
-    const w = this.canvas.width;
-    const w0 = Math.floor(w * pos0);
-    const w1 = Math.floor(w * pos1);
-    const m = Math.abs(w0 - w1);
-    const iw1 = w - w1;
-    if (rotate === 0) {
-      this.splits[0].width = w0;
-      this.splits[1].width = m;
-      this.splits[2].width = iw1;
+  rotate(amount: 1 | 2 | 3) {
+    this.rot = (this.rot + amount) % 4 as 0 | 1 | 2 | 3
+    this.octx.save()
+    this.octx.translate(this.canvas.width / 2, this.canvas.height / 2)
+    this.octx.rotate(Math.PI * .5 * amount)
+    this.octx.drawImage(this.canvas, -this.canvas.width / 2, -this.canvas.height / 2)
+    this.octx.restore()
+    this.ctx.drawImage(this.ocanvas, 0, 0)
+  }
+  render(offset0: number, offset1: number, axis: 0 | 1, inv = false) {
+    const h = this.size
+    const w0 = Math.floor(Math.abs((1 - offset0 + .001) * .5 * this.size))
+    const w2 = Math.floor(Math.abs((1 - offset1 + .001) * .5 * this.size))
+    const w1 = this.size - w0 - w2
+    if (axis === 0) {
+      this.splits[0].width = inv ? w2 : w0;
+      this.splits[1].width = w1;
+      this.splits[2].width = inv ? w0 : w2;
       this.splits[0].height = h;
       this.splits[1].height = h;
       this.splits[2].height = h;
-      const ctx0 = this.splits[rotate].getContext("2d")!;
+      const ctx0 = this.splits[0].getContext("2d")!;
       const ctx1 = this.splits[1].getContext("2d")!;
-      const ctx2 = this.splits[2 - rotate].getContext("2d")!;
-      ctx0.drawImage(this.canvas, 0, 0, w0, h, 0, 0, w0, h);
-      ctx1.drawImage(this.canvas, w0, 0, m, h, 0, 0, m, h);
-      ctx2.drawImage(this.canvas, w1, 0, w1, h, 0, 0, w1, h);
+      const ctx2 = this.splits[2].getContext("2d")!;
+      if (inv) {
+        ctx0.drawImage(this.canvas, 0, 0)
+        ctx1.drawImage(this.canvas, -w2, 0)
+        ctx2.drawImage(this.canvas, -(w2 + w1), 0)
+      } else {
+        ctx0.drawImage(this.canvas, -(w2 + w1), 0)
+        ctx1.drawImage(this.canvas, -w2, 0)
+        ctx2.drawImage(this.canvas, 0, 0)
+      }
     } else {
-      this.splits[0].width = h;
-      this.splits[1].width = h;
       this.splits[2].width = h;
-      this.splits[0].height = w0;
-      this.splits[1].height = m;
-      this.splits[2].height = iw1;
-      const ctx0 = this.splits[rotate - 1].getContext("2d")!;
+      this.splits[1].width = h;
+      this.splits[0].width = h;
+      this.splits[2].height = inv ? w2 : w0;
+      this.splits[1].height = w1;
+      this.splits[0].height = inv ? w0 : w2;
+      const ctx0 = this.splits[0].getContext("2d")!;
       const ctx1 = this.splits[1].getContext("2d")!;
-      const ctx2 = this.splits[3 - rotate].getContext("2d")!;
-      ctx0.drawImage(this.canvas, 0, 0, h, w0, 0, 0, h, w0);
-      ctx1.drawImage(this.canvas, 0, w0, h, m, 0, 0, h, m);
-      ctx2.drawImage(this.canvas, 0, w1, h, iw1, 0, 0, h, iw1);
+      const ctx2 = this.splits[2].getContext("2d")!;
+      if (inv) {
+        ctx2.drawImage(this.canvas, 0, 0)
+        ctx1.drawImage(this.canvas, 0, -w2)
+        ctx0.drawImage(this.canvas, 0, -(w2 + w1))
+      } else {
+        ctx2.drawImage(this.canvas, 0, -(w2 + w1))
+        ctx1.drawImage(this.canvas, 0, -w2)
+        ctx0.drawImage(this.canvas, 0, 0)
+      }
     }
   }
 }
@@ -189,7 +208,7 @@ class Cube {
   back: Face;
   top: Face;
   bottom: Face;
-  animationSpeed = 1;
+  animationSpeed = 200;
   constructor(
     canvases: HTMLCanvasElement[],
     splits: HTMLCanvasElement[],
@@ -218,22 +237,63 @@ class Cube {
     this.top = new Face(canvases[4], splits.slice(12, 15), size, Color.Y);
     this.bottom = new Face(canvases[5], splits.slice(15, 18), size, Color.W);
   }
-  rotate(axis: 0 | 1 | 2, start: number, end: number, amount: number) {
+  async rotate(axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3) {
     if (this.animationSpeed) {
-      const offset0 = ((end + 1) / this.size) * 2 - 1;
-      const offset1 = (start / this.size) * -2 + 1;
-      this.animParams.rotAxis.value = axis + 1 as 1 | 2 | 3
-      switch (axis) {
-        case 0:
-          this.animParams.x0Offset.value = offset0;
-          this.animParams.x1Offset.value = offset1;
-          this.front.render(1, 1, 0);
-          this.right.render(offset1, offset0, 0);
-          this.left.render(offset1, offset0, 0);
-          this.back.render(1, 1, 0);
-          this.top.render(offset0, offset1, 1);
-          this.bottom.render(offset0, offset1, 1);
-      }
+      let rotator: Ref<number>
+      await new Promise<void>((resolve) => {
+        const offset0 = ((end + 1) / this.size) * 2 - 1;
+        const offset1 = (start / this.size) * -2 + 1;
+        this.animParams.rotAxis.value = axis + 1 as 1 | 2 | 3
+        switch (axis) {
+          case 0:
+            this.animParams.x0Offset.value = offset0;
+            this.animParams.x1Offset.value = offset1;
+            this.front.render(1, 1, 0);
+            this.right.render(offset0, offset1, 0);
+            this.left.render(offset0, offset1, 0);
+            this.back.render(1, 1, 0);
+            this.top.render(offset0, offset1, 1);
+            this.bottom.render(offset1, offset0, 1, true);
+            rotator = this.animParams.xRot
+            break
+          case 1:
+            this.animParams.y0Offset.value = offset0;
+            this.animParams.y1Offset.value = offset1;
+            this.front.render(offset1, offset0, 1);
+            this.right.render(offset1, offset0, 1);
+            this.left.render(offset1, offset0, 1);
+            this.back.render(offset1, offset0, 1);
+            this.top.render(1, 1, 0);
+            this.bottom.render(1, 1, 0);
+            rotator = this.animParams.yRot
+            break
+          case 2:
+            this.animParams.z0Offset.value = offset0;
+            this.animParams.z1Offset.value = offset1;
+            this.front.render(offset0, offset1, 0, true);
+            this.right.render(1, 1, 0);
+            this.left.render(1, 1, 0);
+            this.back.render(offset1, offset0, 0);
+            this.top.render(offset0, offset1, 0, true);
+            this.bottom.render(offset0, offset1, 0, true);
+            rotator = this.animParams.zRot
+        }
+        let startTime = Date.now()
+        const animTime = amount === 2 ? 2 : 1;
+        const frame = () => {
+          rotator.value = (Date.now() - startTime) / this.animationSpeed * 90 * (amount === 3 ? -1 : 1)
+          startTime + this.animationSpeed * animTime > Date.now() ? requestAnimationFrame(frame) : resolve()
+        }
+        frame()
+      })
+      rotator!.value = 0
+      this.animParams.x0Offset.value = 1;
+      this.animParams.x1Offset.value = 1;
+      this.animParams.y0Offset.value = 1;
+      this.animParams.y1Offset.value = 1;
+      this.animParams.z0Offset.value = 1;
+      this.animParams.z1Offset.value = 1;
+
     }
   }
 }
@@ -260,7 +320,7 @@ const rotAxis: Ref<0 | 1 | 2 | 3> = ref(0);
 const xShow = computed(() => rotAxis.value === 1);
 const yShow = computed(() => rotAxis.value === 2);
 const zShow = computed(() => rotAxis.value === 3);
-const xRot = ref(16);
+const xRot = ref(0);
 const yRot = ref(0);
 const zRot = ref(0);
 const xRotDeg = computed(() => xRot.value + "deg");
@@ -359,7 +419,8 @@ const backSplit2 = ref<HTMLCanvasElement>();
 const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
-onMounted(() => {
+onMounted(async () => {
+  const size = 100
   const cube = new Cube(
     [
       front.value!,
@@ -401,10 +462,21 @@ onMounted(() => {
       yRot,
       zRot,
     },
-    100,
+    size,
   );
-  cube.rotate(0, 2, 5, 1);
+  while (running) {
+    const axis = Math.floor(Math.random() * 3) as 0 | 1 | 2
+    const start = Math.floor(Math.random() * size)
+    const end = Math.floor(Math.random() * (size - start - 1)) + start
+    const amount = Math.floor(Math.random() * 3) + 1 as 1 | 2 | 3
+    await cube.rotate(axis, start, end, amount)
+  }
+
 });
+let running = true
+onUnmounted(() => {
+  running = false
+})
 </script>
 <style scoped lang="scss">
 .scene {
@@ -456,7 +528,7 @@ onMounted(() => {
 }
 
 .z1 {
-  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin))
+  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin)) rotate(v-bind(zRotDegMinus))
 }
 
 .ix0 {
