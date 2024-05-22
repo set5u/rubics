@@ -250,8 +250,9 @@ class Cube {
     this.bottom = new Face(canvases[5], splits.slice(15, 18), size, Color.W);
   }
   async rotate(axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3) {
+    let rotator: Ref<number | undefined> = ref(undefined);
     if (this.animationSpeed) {
-      let rotator: Ref<number>;
+
       await new Promise<void>((resolve) => {
         const offset0 = ((end + 1) / this.size) * 2 - 1;
         const offset1 = (start / this.size) * -2 + 1;
@@ -303,7 +304,7 @@ class Cube {
         };
         frame();
       });
-      rotator!.value = 0;
+      rotator.value && (rotator.value = 0);
       this.animParams.x0Offset.value = 1;
       this.animParams.x1Offset.value = 1;
       this.animParams.y0Offset.value = 1;
@@ -527,7 +528,7 @@ const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 onMounted(async () => {
-  const size = 12;
+  const size = 256;
   const cube = new Cube(
     [
       front.value!,
@@ -571,6 +572,7 @@ onMounted(async () => {
     },
     size,
   );
+  cube.animationSpeed = 100
   while (running) {
     const axis = Math.floor(Math.random() * 3) as 0 | 1 | 2
     const start = Math.floor(Math.random() * size)
