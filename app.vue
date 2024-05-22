@@ -161,9 +161,9 @@ class Face {
     const w2 = Math.floor(Math.abs((1 - offset1 + .001) * .5 * this.size))
     const w1 = this.size - w0 - w2
     if (axis === 0) {
-      this.splits[0].width = inv ? w2 : w0;
+      this.splits[0].width = w0;
       this.splits[1].width = w1;
-      this.splits[2].width = inv ? w0 : w2;
+      this.splits[2].width = w2;
       this.splits[0].height = h;
       this.splits[1].height = h;
       this.splits[2].height = h;
@@ -172,8 +172,8 @@ class Face {
       const ctx2 = this.splits[2].getContext("2d")!;
       if (inv) {
         ctx0.drawImage(this.canvas, 0, 0)
-        ctx1.drawImage(this.canvas, -w2, 0)
-        ctx2.drawImage(this.canvas, -(w2 + w1), 0)
+        ctx1.drawImage(this.canvas, -w0, 0)
+        ctx2.drawImage(this.canvas, -(w0 + w1), 0)
       } else {
         ctx0.drawImage(this.canvas, -(w2 + w1), 0)
         ctx1.drawImage(this.canvas, -w2, 0)
@@ -183,16 +183,16 @@ class Face {
       this.splits[2].width = h;
       this.splits[1].width = h;
       this.splits[0].width = h;
-      this.splits[2].height = inv ? w2 : w0;
+      this.splits[2].height = w0;
       this.splits[1].height = w1;
-      this.splits[0].height = inv ? w0 : w2;
+      this.splits[0].height = w2;
       const ctx0 = this.splits[0].getContext("2d")!;
       const ctx1 = this.splits[1].getContext("2d")!;
       const ctx2 = this.splits[2].getContext("2d")!;
       if (inv) {
         ctx2.drawImage(this.canvas, 0, 0)
-        ctx1.drawImage(this.canvas, 0, -w2)
-        ctx0.drawImage(this.canvas, 0, -(w2 + w1))
+        ctx1.drawImage(this.canvas, 0, -w0)
+        ctx0.drawImage(this.canvas, 0, -(w0 + w1))
       } else {
         ctx2.drawImage(this.canvas, 0, -(w2 + w1))
         ctx1.drawImage(this.canvas, 0, -w2)
@@ -249,11 +249,11 @@ class Cube {
             this.animParams.x0Offset.value = offset0;
             this.animParams.x1Offset.value = offset1;
             this.front.render(1, 1, 0);
-            this.right.render(offset0, offset1, 0);
+            this.right.render(offset0, offset1, 0, true);
             this.left.render(offset0, offset1, 0);
             this.back.render(1, 1, 0);
             this.top.render(offset0, offset1, 1);
-            this.bottom.render(offset1, offset0, 1, true);
+            this.bottom.render(offset0, offset1, 1, true);
             rotator = this.animParams.xRot
             break
           case 1:
@@ -270,12 +270,12 @@ class Cube {
           case 2:
             this.animParams.z0Offset.value = offset0;
             this.animParams.z1Offset.value = offset1;
-            this.front.render(offset0, offset1, 0, true);
+            this.front.render(offset1, offset0, 0, true);
             this.right.render(1, 1, 0);
             this.left.render(1, 1, 0);
             this.back.render(offset1, offset0, 0);
-            this.top.render(offset0, offset1, 0, true);
-            this.bottom.render(offset0, offset1, 0, true);
+            this.top.render(offset1, offset0, 0, true);
+            this.bottom.render(offset1, offset0, 0, true);
             rotator = this.animParams.zRot
         }
         let startTime = Date.now()
@@ -420,7 +420,7 @@ const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 onMounted(async () => {
-  const size = 100
+  const size = 12
   const cube = new Cube(
     [
       front.value!,
