@@ -12,24 +12,12 @@
     @mouseup="unlock"
   )
     .cube
-      .bg-gray-400.border-2.border-black.face.splitter.x0(
-        v-show="xShow"
-      )
-      .bg-gray-400.border-2.border-black.face.splitter.x1(
-        v-show="xShow"
-      )
-      .bg-gray-400.border-2.border-black.face.splitter.y0(
-        v-show="yShow"
-      )
-      .bg-gray-400.border-2.border-black.face.splitter.y1(
-        v-show="yShow"
-      )
-      .bg-gray-400.border-2.border-black.face.splitter.z0(
-        v-show="zShow"
-      )
-      .bg-gray-400.border-2.border-black.face.splitter.z1(
-        v-show="zShow"
-      )
+      .bg-gray-400.border-2.border-black.face.splitter.x0(v-show="xShow")
+      .bg-gray-400.border-2.border-black.face.splitter.x1(v-show="xShow")
+      .bg-gray-400.border-2.border-black.face.splitter.y0(v-show="yShow")
+      .bg-gray-400.border-2.border-black.face.splitter.y1(v-show="yShow")
+      .bg-gray-400.border-2.border-black.face.splitter.z0(v-show="zShow")
+      .bg-gray-400.border-2.border-black.face.splitter.z1(v-show="zShow")
       .bg-gray-400.border-2.border-black.face.splitter.ix0(
         v-show="xShow && x0Offset !== 1"
       )
@@ -147,12 +135,7 @@ class Face {
     this.data[i] = v;
     const pixelSize = this.canvas.width / this.size;
     this.ctx.fillStyle = i2color[v];
-    this.ctx.fillRect(
-      x * pixelSize,
-      y * pixelSize,
-      pixelSize,
-      pixelSize,
-    );
+    this.ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
   }
   rotate(amount: 1 | 2 | 3) {
     this.rot = ((this.rot + amount) % 4) as 0 | 1 | 2 | 3;
@@ -251,67 +234,65 @@ class Cube {
   }
   async rotate(axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3) {
     let rotator: Ref<number | undefined> = ref(undefined);
-    if (this.animationSpeed) {
+    await new Promise<void>((resolve) => {
+      const offset0 = ((end + 1) / this.size) * 2 - 1;
+      const offset1 = (start / this.size) * -2 + 1;
+      this.animParams.rotAxis.value = (axis + 1) as 1 | 2 | 3;
+      switch (axis) {
+        case 0:
+          this.animParams.x0Offset.value = offset0;
+          this.animParams.x1Offset.value = offset1;
+          this.front.render(1, 1, 0);
+          this.right.render(offset0, offset1, 0, true);
+          this.left.render(offset0, offset1, 0);
+          this.back.render(1, 1, 0);
+          this.top.render(offset0, offset1, 1);
+          this.bottom.render(offset0, offset1, 1, true);
+          rotator = this.animParams.xRot;
+          break;
+        case 1:
+          this.animParams.y0Offset.value = offset0;
+          this.animParams.y1Offset.value = offset1;
+          this.front.render(offset1, offset0, 1);
+          this.right.render(offset1, offset0, 1);
+          this.left.render(offset1, offset0, 1);
+          this.back.render(offset1, offset0, 1);
+          this.top.render(1, 1, 0);
+          this.bottom.render(1, 1, 0);
+          rotator = this.animParams.yRot;
+          break;
+        case 2:
+          this.animParams.z0Offset.value = offset0;
+          this.animParams.z1Offset.value = offset1;
+          this.front.render(offset1, offset0, 0, true);
+          this.right.render(1, 1, 0);
+          this.left.render(1, 1, 0);
+          this.back.render(offset1, offset0, 0);
+          this.top.render(offset1, offset0, 0, true);
+          this.bottom.render(offset1, offset0, 0, true);
+          rotator = this.animParams.zRot;
+      }
+      let startTime = Date.now();
+      const animTime = amount === 2 ? 2 : 1;
+      const frame = () => {
+        rotator.value =
+          ((Date.now() - startTime) / this.animationSpeed) *
+          90 *
+          (amount === 3 ? -1 : 1);
+        startTime + this.animationSpeed * animTime > Date.now()
+          ? requestAnimationFrame(frame)
+          : resolve();
+      };
+      frame();
+    });
+    rotator.value && (rotator.value = 0);
+    this.animParams.x0Offset.value = 1;
+    this.animParams.x1Offset.value = 1;
+    this.animParams.y0Offset.value = 1;
+    this.animParams.y1Offset.value = 1;
+    this.animParams.z0Offset.value = 1;
+    this.animParams.z1Offset.value = 1;
 
-      await new Promise<void>((resolve) => {
-        const offset0 = ((end + 1) / this.size) * 2 - 1;
-        const offset1 = (start / this.size) * -2 + 1;
-        this.animParams.rotAxis.value = (axis + 1) as 1 | 2 | 3;
-        switch (axis) {
-          case 0:
-            this.animParams.x0Offset.value = offset0;
-            this.animParams.x1Offset.value = offset1;
-            this.front.render(1, 1, 0);
-            this.right.render(offset0, offset1, 0, true);
-            this.left.render(offset0, offset1, 0);
-            this.back.render(1, 1, 0);
-            this.top.render(offset0, offset1, 1);
-            this.bottom.render(offset0, offset1, 1, true);
-            rotator = this.animParams.xRot;
-            break;
-          case 1:
-            this.animParams.y0Offset.value = offset0;
-            this.animParams.y1Offset.value = offset1;
-            this.front.render(offset1, offset0, 1);
-            this.right.render(offset1, offset0, 1);
-            this.left.render(offset1, offset0, 1);
-            this.back.render(offset1, offset0, 1);
-            this.top.render(1, 1, 0);
-            this.bottom.render(1, 1, 0);
-            rotator = this.animParams.yRot;
-            break;
-          case 2:
-            this.animParams.z0Offset.value = offset0;
-            this.animParams.z1Offset.value = offset1;
-            this.front.render(offset1, offset0, 0, true);
-            this.right.render(1, 1, 0);
-            this.left.render(1, 1, 0);
-            this.back.render(offset1, offset0, 0);
-            this.top.render(offset1, offset0, 0, true);
-            this.bottom.render(offset1, offset0, 0, true);
-            rotator = this.animParams.zRot;
-        }
-        let startTime = Date.now();
-        const animTime = amount === 2 ? 2 : 1;
-        const frame = () => {
-          rotator.value =
-            ((Date.now() - startTime) / this.animationSpeed) *
-            90 *
-            (amount === 3 ? -1 : 1);
-          startTime + this.animationSpeed * animTime > Date.now()
-            ? requestAnimationFrame(frame)
-            : resolve();
-        };
-        frame();
-      });
-      rotator.value && (rotator.value = 0);
-      this.animParams.x0Offset.value = 1;
-      this.animParams.x1Offset.value = 1;
-      this.animParams.y0Offset.value = 1;
-      this.animParams.y1Offset.value = 1;
-      this.animParams.z0Offset.value = 1;
-      this.animParams.z1Offset.value = 1;
-    }
     if (start === 0) {
       [this.back, this.bottom, this.left][axis].rotate(
         (4 - amount) as 1 | 2 | 3,
@@ -325,30 +306,30 @@ class Cube {
         () => {
           const ret: number[][] = [[], [], [], []];
           for (let k = 0; k < this.size; k++) {
-            ret[0][k] = this.top.getAt(k, j)
-            ret[1][k] = this.right.getAt(this.size - j - 1, k)
-            ret[2][k] = this.bottom.getAt(this.size - k - 1, this.size - j - 1)
-            ret[3][k] = this.left.getAt(j, this.size - k - 1)
+            ret[0][k] = this.top.getAt(k, j);
+            ret[1][k] = this.right.getAt(this.size - j - 1, k);
+            ret[2][k] = this.bottom.getAt(this.size - k - 1, this.size - j - 1);
+            ret[3][k] = this.left.getAt(j, this.size - k - 1);
           }
           return ret;
         },
         () => {
-          const ret: number[][] = [[], [], [], []]
+          const ret: number[][] = [[], [], [], []];
           for (let k = 0; k < this.size; k++) {
-            ret[0][k] = this.front.getAt(k, this.size - j - 1)
-            ret[1][k] = this.left.getAt(k, this.size - j - 1)
-            ret[2][k] = this.back.getAt(k, this.size - j - 1)
-            ret[3][k] = this.right.getAt(k, this.size - j - 1)
+            ret[0][k] = this.front.getAt(k, this.size - j - 1);
+            ret[1][k] = this.left.getAt(k, this.size - j - 1);
+            ret[2][k] = this.back.getAt(k, this.size - j - 1);
+            ret[3][k] = this.right.getAt(k, this.size - j - 1);
           }
           return ret;
         },
         () => {
-          const ret: number[][] = [[], [], [], []]
+          const ret: number[][] = [[], [], [], []];
           for (let k = 0; k < this.size; k++) {
-            ret[0][k] = this.front.getAt(j, k,)
-            ret[1][k] = this.top.getAt(j, k)
-            ret[2][k] = this.back.getAt(this.size - j - 1, this.size - k - 1)
-            ret[3][k] = this.bottom.getAt(j, k)
+            ret[0][k] = this.front.getAt(j, k);
+            ret[1][k] = this.top.getAt(j, k);
+            ret[2][k] = this.back.getAt(this.size - j - 1, this.size - k - 1);
+            ret[3][k] = this.bottom.getAt(j, k);
           }
           return ret;
         },
@@ -356,28 +337,40 @@ class Cube {
       for (let i = 0; i < amount; i++) {
         elements.unshift(elements.pop()!);
       }
-      [() => {
-        for (let k = 0; k < this.size; k++) {
-          this.top.setAt(k, j, elements[0][k])
-          this.right.setAt(this.size - j - 1, k, elements[1][k])
-          this.bottom.setAt(this.size - k - 1, this.size - j - 1, elements[2][k])
-          this.left.setAt(j, this.size - k - 1, elements[3][k])
-        }
-      }, () => {
-        for (let k = 0; k < this.size; k++) {
-          this.front.setAt(k, this.size - j - 1, elements[0][k])
-          this.left.setAt(k, this.size - j - 1, elements[1][k])
-          this.back.setAt(k, this.size - j - 1, elements[2][k])
-          this.right.setAt(k, this.size - j - 1, elements[3][k])
-        }
-      }, () => {
-        for (let k = 0; k < this.size; k++) {
-          this.front.setAt(j, k, elements[0][k])
-          this.top.setAt(j, k, elements[1][k])
-          this.back.setAt(this.size - j - 1, this.size - k - 1, elements[2][k])
-          this.bottom.setAt(j, k, elements[3][k])
-        }
-      }][axis]();
+      [
+        () => {
+          for (let k = 0; k < this.size; k++) {
+            this.top.setAt(k, j, elements[0][k]);
+            this.right.setAt(this.size - j - 1, k, elements[1][k]);
+            this.bottom.setAt(
+              this.size - k - 1,
+              this.size - j - 1,
+              elements[2][k],
+            );
+            this.left.setAt(j, this.size - k - 1, elements[3][k]);
+          }
+        },
+        () => {
+          for (let k = 0; k < this.size; k++) {
+            this.front.setAt(k, this.size - j - 1, elements[0][k]);
+            this.left.setAt(k, this.size - j - 1, elements[1][k]);
+            this.back.setAt(k, this.size - j - 1, elements[2][k]);
+            this.right.setAt(k, this.size - j - 1, elements[3][k]);
+          }
+        },
+        () => {
+          for (let k = 0; k < this.size; k++) {
+            this.front.setAt(j, k, elements[0][k]);
+            this.top.setAt(j, k, elements[1][k]);
+            this.back.setAt(
+              this.size - j - 1,
+              this.size - k - 1,
+              elements[2][k],
+            );
+            this.bottom.setAt(j, k, elements[3][k]);
+          }
+        },
+      ][axis]();
     }
   }
 }
@@ -528,7 +521,7 @@ const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 onMounted(async () => {
-  const size = 256;
+  const size = 64;
   const cube = new Cube(
     [
       front.value!,
@@ -572,11 +565,11 @@ onMounted(async () => {
     },
     size,
   );
-  cube.animationSpeed = 100
+  cube.animationSpeed = 100;
   while (running) {
-    const axis = Math.floor(Math.random() * 3) as 0 | 1 | 2
-    const start = Math.floor(Math.random() * size)
-    const end = Math.floor(Math.random() * (size - start - 1)) + start
+    const axis = Math.floor(Math.random() * 3) as 0 | 1 | 2;
+    const start = Math.floor(Math.random() * size);
+    const end = Math.floor(Math.random() * (size - start - 1)) + start;
     const amount = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
     await cube.rotate(axis, start, end, amount);
   }
@@ -595,7 +588,8 @@ onUnmounted(() => {
   transform-style: preserve-3d;
   --rotY: v-bind(rotY);
   --rotX: v-bind(rotX);
-  transform: rotateX(calc(var(--rotX) * 1deg)) rotateY(calc(var(--rotY) * 1deg)) translateX(-25vmin) translateY(-25vmin);
+  transform: rotateX(calc(var(--rotX) * 1deg)) rotateY(calc(var(--rotY) * 1deg))
+    translateX(-25vmin) translateY(-25vmin);
 }
 
 .face {
@@ -616,27 +610,33 @@ onUnmounted(() => {
 }
 
 .x0 {
-  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin)) rotate(v-bind(xRotDeg));
+  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin))
+    rotate(v-bind(xRotDeg));
 }
 
 .x1 {
-  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin)) rotate(v-bind(xRotDegMinus));
+  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin))
+    rotate(v-bind(xRotDegMinus));
 }
 
 .y0 {
-  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin)) rotate(v-bind(yRotDeg));
+  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin))
+    rotate(v-bind(yRotDeg));
 }
 
 .y1 {
-  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin)) rotate(v-bind(yRotDegMinus));
+  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin))
+    rotate(v-bind(yRotDegMinus));
 }
 
 .z0 {
-  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin)) rotate(v-bind(zRotDeg));
+  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin))
+    rotate(v-bind(zRotDeg));
 }
 
 .z1 {
-  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin)) rotate(v-bind(zRotDegMinus));
+  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin))
+    rotate(v-bind(zRotDegMinus));
 }
 
 .ix0 {
@@ -690,7 +690,9 @@ onUnmounted(() => {
   left: v-bind(topLeft);
   width: v-bind(topWidth);
   height: v-bind(topHeight);
-  transform: translate3d(v-bind(leftRotOffset), v-bind(backRotOffset), -25vmin) rotateY(v-bind(xRotDeg)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(frontRotOffset), 25vmin);
+  transform: translate3d(v-bind(leftRotOffset), v-bind(backRotOffset), -25vmin)
+    rotateY(v-bind(xRotDeg)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(frontRotOffset), 25vmin);
 }
 
 .top2 {
@@ -716,7 +718,9 @@ onUnmounted(() => {
   left: v-bind(topLeft);
   width: v-bind(topWidth);
   height: v-bind(topHeight);
-  transform: translate3d(v-bind(leftRotOffset), v-bind(frontRotOffset), -25vmin) rotateY(v-bind(xRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(backRotOffset), 25vmin);
+  transform: translate3d(v-bind(leftRotOffset), v-bind(frontRotOffset), -25vmin)
+    rotateY(v-bind(xRotDegMinus)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(backRotOffset), 25vmin);
 }
 
 .bottom2 {
@@ -742,9 +746,13 @@ onUnmounted(() => {
   left: v-bind(frontLeft);
   width: v-bind(frontWidth);
   height: v-bind(frontHeight);
-  transform: translate3d(v-bind(leftRotOffset),
+  transform: translate3d(
+      v-bind(leftRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .front2 {
@@ -770,9 +778,13 @@ onUnmounted(() => {
   left: v-bind(rightLeft);
   width: v-bind(rightWidth);
   height: v-bind(rightHeight);
-  transform: translate3d(v-bind(frontRotOffset),
+  transform: translate3d(
+      v-bind(frontRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDegMinus)) translate3d(v-bind(backRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDegMinus))
+    translate3d(v-bind(backRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .right2 {
@@ -798,9 +810,13 @@ onUnmounted(() => {
   right: v-bind(frontLeft);
   width: v-bind(frontWidth);
   height: v-bind(frontHeight);
-  transform: translate3d(v-bind(rightRotOffset),
+  transform: translate3d(
+      v-bind(rightRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDegMinus)) translate3d(v-bind(leftRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDegMinus))
+    translate3d(v-bind(leftRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .back2 {
@@ -826,9 +842,13 @@ onUnmounted(() => {
   right: v-bind(rightLeft);
   width: v-bind(rightWidth);
   height: v-bind(rightHeight);
-  transform: translate3d(v-bind(backRotOffset),
+  transform: translate3d(
+      v-bind(backRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDeg)) translate3d(v-bind(frontRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDeg))
+    translate3d(v-bind(frontRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .left2 {
@@ -841,7 +861,7 @@ onUnmounted(() => {
 <style lang="scss">
 html,
 body,
-body> :first-child {
+body > :first-child {
   height: 100%;
   background-color: #555;
 }
