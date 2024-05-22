@@ -1,5 +1,5 @@
 <template lang="pug">
-.h-full(@pointer-down.prevent)
+.h-full(@pointer-down.capture.prevent)
   .hidden
     canvas(ref="top")
     canvas(ref="bottom")
