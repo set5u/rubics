@@ -12,18 +12,18 @@
     @mouseup.self="unlock"
   )
     .cube
-      .bg-gray-400.face.splitter.x0(v-show="xShow")
-      .bg-gray-400.face.splitter.x1(v-show="xShow")
-      .bg-gray-400.face.splitter.y0(v-show="yShow")
-      .bg-gray-400.face.splitter.y1(v-show="yShow")
-      .bg-gray-400.face.splitter.z0(v-show="zShow")
-      .bg-gray-400.face.splitter.z1(v-show="zShow")
-      .bg-gray-400.face.splitter.ix0(v-show="xShow")
-      .bg-gray-400.face.splitter.ix1(v-show="xShow")
-      .bg-gray-400.face.splitter.iy0(v-show="yShow")
-      .bg-gray-400.face.splitter.iy1(v-show="yShow")
-      .bg-gray-400.face.splitter.iz0(v-show="zShow")
-      .bg-gray-400.face.splitter.iz1(v-show="zShow")
+      .bg-gray-400.border-2.border-black.face.splitter.x0(v-show="xShow")
+      .bg-gray-400.border-2.border-black.face.splitter.x1(v-show="xShow")
+      .bg-gray-400.border-2.border-black.face.splitter.y0(v-show="yShow")
+      .bg-gray-400.border-2.border-black.face.splitter.y1(v-show="yShow")
+      .bg-gray-400.border-2.border-black.face.splitter.z0(v-show="zShow")
+      .bg-gray-400.border-2.border-black.face.splitter.z1(v-show="zShow")
+      .bg-gray-400.border-2.border-black.face.splitter.ix0(v-show="xShow && x0Offset !== 1")
+      .bg-gray-400.border-2.border-black.face.splitter.ix1(v-show="xShow && x1Offset !== 1")
+      .bg-gray-400.border-2.border-black.face.splitter.iy0(v-show="yShow && y0Offset !== 1")
+      .bg-gray-400.border-2.border-black.face.splitter.iy1(v-show="yShow && y1Offset !== 1")
+      .bg-gray-400.border-2.border-black.face.splitter.iz0(v-show="zShow && z0Offset !== 1")
+      .bg-gray-400.border-2.border-black.face.splitter.iz1(v-show="zShow && z1Offset !== 1")
       .face.base(style="--i: 1"): .top.frame
         canvas.split.top0(ref="topSplit0")
         canvas.split.middle.top1(ref="topSplit1")
@@ -123,6 +123,7 @@ class Face {
       pixelSize,
     );
   }
+  rotate(amount: 1 | 2 | 3) { }
   render(offset0: number, offset1: number, axis: 0 | 1) {
     const rotate = axis
     const pos0 = -offset1 * 0.5 + 0.5;
@@ -187,7 +188,7 @@ class Cube {
     },
     public size: number,
   ) {
-    const newSize = Math.floor(1024 / size + 1) * size
+    const newSize = Math.floor(1024 / size) * size
     canvases.forEach((c) => {
       c.width = newSize;
       c.height = newSize;
@@ -201,7 +202,7 @@ class Cube {
   }
   rotate(axis: 0 | 1 | 2, start: number, end: number, amount: number) {
     if (this.animationSpeed) {
-      const offset0 = (end / this.size) * 2 - 1;
+      const offset0 = ((end + 1) / this.size) * 2 - 1;
       const offset1 = (start / this.size) * -2 + 1;
       this.animParams.rotAxis.value = axis + 1 as 1 | 2 | 3
       switch (axis) {
@@ -251,22 +252,22 @@ const xRotDegMinus = computed(() => -xRot.value + "deg");
 const yRotDegMinus = computed(() => -yRot.value + "deg");
 const zRotDegMinus = computed(() => -zRot.value + "deg");
 const topZRot = computed(() =>
-  y1Offset.value === 1 ? yRot.value + "deg" : "0deg",
+  y0Offset.value === 1 ? yRot.value + "deg" : "0deg",
 );
 const bottomZRot = computed(() =>
-  y0Offset.value === 1 ? -yRot.value + "deg" : "0deg",
+  y1Offset.value === 1 ? -yRot.value + "deg" : "0deg",
 );
 const frontZRot = computed(() =>
-  x1Offset.value === 1 ? xRot.value + "deg" : "0deg",
+  x0Offset.value === 1 ? xRot.value + "deg" : "0deg",
 );
 const rightZRot = computed(() =>
-  z1Offset.value === 1 ? zRot.value + "deg" : "0deg",
+  z0Offset.value === 1 ? zRot.value + "deg" : "0deg",
 );
 const backZRot = computed(() =>
-  x0Offset.value === 1 ? -xRot.value + "deg" : "0deg",
+  x1Offset.value === 1 ? -xRot.value + "deg" : "0deg",
 );
 const leftZRot = computed(() =>
-  z0Offset.value === 1 ? -zRot.value + "deg" : "0deg",
+  z1Offset.value === 1 ? -zRot.value + "deg" : "0deg",
 );
 const topTop = computed(() => (1 - x1Offset.value) * 25 + "vmin");
 const topLeft = computed(() => (1 - z1Offset.value) * 25 + "vmin");
@@ -340,7 +341,6 @@ const backSplit2 = ref<HTMLCanvasElement>();
 const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
-let cubeRef = shallowRef<Cube>();
 onMounted(() => {
   const cube = new Cube(
     [
@@ -383,10 +383,9 @@ onMounted(() => {
       yRot,
       zRot,
     },
-    5,
+    100,
   );
-  cubeRef.value = cube;
-  cube.rotate(0, 1, 3, 1);
+  cube.rotate(0, 2, 5, 1);
 });
 </script>
 <style scoped lang="scss">
@@ -468,10 +467,6 @@ onMounted(() => {
 
 .split {
   position: absolute;
-}
-
-.middle {
-  border: 0.15rem black solid;
 }
 
 .frame {
