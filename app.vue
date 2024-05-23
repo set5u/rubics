@@ -401,6 +401,7 @@ enum SolveStep {
   DOWN_CORNER,
   EDGE,
   WHITE_X,
+  WHITE_EDGE,
 }
 const whiteUp: Step[][] = [
   [],
@@ -473,6 +474,8 @@ const leftStep: Step[] = [[1, -1, -1, 3], [2, 0, 0, 1], [1, -1, -1, 1], [2, 0, 0
 const insertRightEdge: Step[] = [...rightStep, [1, 0, -1, 1], ...leftStep]
 const insertLeftEdge: Step[] = [...leftStep, [1, 0, -1, 3], ...rightStep]
 const whiteX: Step[] = [[0, -1, -1, 1], ...rightStep, [0, -1, -1, 3]]
+const whiteX2: Step[] = [[0, -1, -1, 1], ...rightStep, ...rightStep, [0, -1, -1, 3]]
+const whiteEdge: Step[] = [[1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 2], [2, -1, -1, 3], [1, -1, -1, 3], [2, -1, -1, 1], [1, -1, -1, 3], [2, -1, -1, 3]]
 const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
   (cube) => {
     let retI: number;
@@ -714,18 +717,46 @@ const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
       case "WNWN":
       case "NWNW":
       case "WNNW":
-      case "NNNN":
         return whiteX
+      case "NNNN":
+        return whiteX2
       case "NNWW":
         return [[1, -1, -1, 1]]
       case "NWWN":
         return [[1, -1, -1, 2]]
       case "WWNN":
         return [[1, -1, -1, 3]]
-      // パリティ
+      // TODO: パリティ
     }
 
     return []
+  },
+  (cube) => {
+    const t = cube.back.getAt(1, 0)
+    const r = cube.right.getAt(1, 0)
+    const b = cube.front.getAt(1, 0)
+    const l = cube.left.getAt(1, 0)
+    const fe = cube.front.getAt(1, 1) === b ? "F" : "N"
+    const le = cube.left.getAt(1, 1) === l ? "L" : "N"
+    const be = cube.back.getAt(1, 1) === t ? "B" : "N"
+    const re = cube.right.getAt(1, 1) === r ? "R" : "N"
+
+    switch (fe + le + be + re) {
+      case "FLBR":
+        return []
+      case "FLNN":
+      case "FNBN":
+        return whiteEdge
+      case "FNNR":
+        return [[1, 0, -1, 1]]
+      case "NNBR":
+        return [[1, 0, -1, 2]]
+      case "NLBN":
+        return [[1, 0, -1, 3]]
+      default:
+        return [[1, -1, -1, 1]]
+
+    }
   }
 ];
 type Step = [axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3];
