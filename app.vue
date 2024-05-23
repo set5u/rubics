@@ -400,6 +400,7 @@ enum SolveStep {
   FLOWER_DOWN,
   DOWN_CORNER,
   EDGE,
+  WHITE_X,
 }
 const whiteUp: Step[][] = [
   [],
@@ -471,6 +472,7 @@ const rightStep: Step[] = [[1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 3], [2, -
 const leftStep: Step[] = [[1, -1, -1, 3], [2, 0, 0, 1], [1, -1, -1, 1], [2, 0, 0, 3],]
 const insertRightEdge: Step[] = [...rightStep, [1, 0, -1, 1], ...leftStep]
 const insertLeftEdge: Step[] = [...leftStep, [1, 0, -1, 3], ...rightStep]
+const whiteX: Step[] = [[0, -1, -1, 1], ...rightStep, [0, -1, -1, 3]]
 const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
   (cube) => {
     let retI: number;
@@ -700,6 +702,30 @@ const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
     }
     state.v++
     return [[1, -1, -1, 1]]
+  },
+  (cube) => {
+    const t = cube.top.getAt(1, 0) === Color.W ? "W" : "N"
+    const r = cube.top.getAt(-1, 1) === Color.W ? "W" : "N"
+    const b = cube.top.getAt(1, -1) === Color.W ? "W" : "N"
+    const l = cube.top.getAt(0, 1) === Color.W ? "W" : "N"
+    switch (t + r + b + l) {
+      case "WWWW":
+        return []
+      case "WNWN":
+      case "NWNW":
+      case "WNNW":
+      case "NNNN":
+        return whiteX
+      case "NNWW":
+        return [[1, -1, -1, 1]]
+      case "NWWN":
+        return [[1, -1, -1, 2]]
+      case "WWNN":
+        return [[1, -1, -1, 3]]
+      // パリティ
+    }
+
+    return []
   }
 ];
 type Step = [axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3];
@@ -927,6 +953,7 @@ onMounted(async () => {
     await new Promise<void>((resolve) => {
       setTimeout(() => resolve(), 1000)
     })
+    break
   }
 });
 </script>
