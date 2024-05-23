@@ -112,6 +112,12 @@ class Face {
     }
   }
   getIndexAt(x: number, y: number) {
+    if (x < 0) {
+      x = this.size + x;
+    }
+    if (y < 0) {
+      y = this.size + y;
+    }
     switch (this.rot) {
       case 0:
         return x + this.size * y;
@@ -230,6 +236,12 @@ class Cube {
   }
   async rotate(axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3) {
     let rotator: Ref<number | undefined> = ref(undefined);
+    if (start < 0) {
+      start = this.size + start;
+    }
+    if (end < 0) {
+      end = this.size + end;
+    }
     await new Promise<void>((resolve) => {
       const offset0 = ((end + 1) / this.size) * 2 - 1;
       const offset1 = (start / this.size) * -2 + 1;
@@ -288,12 +300,6 @@ class Cube {
     this.animParams.y1Offset.value = 1;
     this.animParams.z0Offset.value = 1;
     this.animParams.z1Offset.value = 1;
-    this.front.render(1, 1, 0);
-    this.right.render(1, 1, 0);
-    this.left.render(1, 1, 0);
-    this.back.render(1, 1, 0);
-    this.top.render(1, 1, 0);
-    this.bottom.render(1, 1, 0);
     if (start === 0) {
       [this.back, this.bottom, this.left][axis].rotate(
         (4 - amount) as 1 | 2 | 3,
@@ -373,26 +379,196 @@ class Cube {
         },
       ][axis]();
     }
+    this.front.render(1, 1, 0);
+    this.right.render(1, 1, 0);
+    this.left.render(1, 1, 0);
+    this.back.render(1, 1, 0);
+    this.top.render(1, 1, 0);
+    this.bottom.render(1, 1, 0);
   }
 }
 enum SolveStep {
-  FLOWER_WHITE_UP,
-  FLOWER_YELLOW_DOWN
+  WHITE_UP,
+  FLOWER,
+  FLOWER_DOWN,
 }
-const solveStepFuncs: ((cube: Cube, queue: Step[]) => boolean)[] = [() => true, () => true]
-type Step = [axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3]
+const whiteUp: [
+  top: Step[],
+  bottom: Step[],
+  front: Step[],
+  right: Step[],
+  back: Step[],
+  left: Step[],
+] = [
+    [],
+    [[0, 0, -1, 2]],
+    [[2, 0, -1, 1]],
+    [[0, 0, -1, 3]],
+    [[2, 0, -1, 3]],
+    [[0, 0, -1, 1]],
+  ];
+const flower: [
+  rightTop: Step[],
+  frontTop: Step[],
+  leftTop: Step[],
+  backTop: Step[],
+  rightRight: Step[],
+  rightLeft: Step[],
+  frontRight: Step[],
+  frontLeft: Step[],
+  leftRight: Step[],
+  leftLeft: Step[],
+  backRight: Step[],
+  backLeft: Step[],
+  rightBottom: Step[],
+  frontBottom: Step[],
+  leftBottom: Step[],
+  backBottom: Step[],
+  bottomRight: Step[],
+  bottomFront: Step[],
+  bottomLeft: Step[],
+  bottomBack: Step[],
+] = [[[2, -1, -1, 1]],
+[[0, -1, -1, 1]],
+[[2, 0, 0, 1]],
+[[0, 0, 0, 1]],
+[[1, -1, -1, 3], [0, 0, 0, 3]],
+[[1, -1, -1, 1], [0, -1, -1, 3]],
+[[2, -1, -1, 1]],
+[[1, -1, -1, 2], [2, 0, 0, 1]],
+[[1, -1, -1, 1], [0, -1, -1, 1]],
+[[1, -1, -1, 3], [0, 0, 0, 1]],
+[[1, -1, -1, 2], [2, 0, 0, 3]],
+[[2, -1, -1, 3]],
+[[2, -1, -1, 1]],
+[[1, -1, -1, 1], [0, -1, -1, 1]],
+[[1, -1, -1, 2], [2, 0, 0, 1]],
+[[1, -1, -1, 3], [0, 0, 0, 1]],
+[[2, -1, -1, 2]],
+[[1, -1, -1, 1], [0, -1, -1, 2]],
+[[1, -1, -1, 2], [2, 0, 0, 2]],
+[[1, -1, -1, 3], [0, 0, 0, 2]],];
+const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
+  (cube) => {
+    let retI: number;
+    switch (Color.W) {
+      case cube.top.getAt(1, 1):
+        retI = 0;
+        break;
+      case cube.bottom.getAt(1, 1):
+        retI = 1;
+        break;
+      case cube.front.getAt(1, 1):
+        retI = 2;
+        break;
+      case cube.right.getAt(1, 1):
+        retI = 3;
+        break;
+      case cube.back.getAt(1, 1):
+        retI = 4;
+        break;
+      case cube.left.getAt(1, 1):
+        retI = 5;
+        break;
+      default:
+        retI = 0;
+    }
+    return whiteUp[retI];
+  },
+  (cube) => {
+    const y0 = cube.top.getAt(0, 1) === Color.Y, y1 = cube.top.getAt(1, 0) === Color.Y, y2 = cube.top.getAt(-1, 1) === Color.Y, y3 = cube.top.getAt(1, -1) === Color.Y
+    if (y0 && y1 && y2 && y3) {
+      return []
+    }
+    if (y0 && y2 && y3) {
+      return [[1, 0, -1, 1]]
+    }
+    if (y2) {
+      return [[1, 0, -1, 3]]
+    }
+    let retI: number;
+    switch (Color.Y) {
+      case cube.right.getAt(1, 0):
+        retI = 0;
+        break
+      case cube.front.getAt(1, 0):
+        retI = 1;
+        break
+      case cube.left.getAt(1, 0):
+        retI = 2;
+        break
+      case cube.back.getAt(1, 0):
+        retI = 3;
+        break
+      case cube.right.getAt(-1, 1):
+        retI = 4;
+        break
+      case cube.right.getAt(0, 1):
+        retI = 5;
+        break
+      case cube.front.getAt(-1, 1):
+        retI = 6;
+        break
+      case cube.front.getAt(0, 1):
+        retI = 7;
+        break
+      case cube.left.getAt(-1, 1):
+        retI = 8;
+        break
+      case cube.left.getAt(0, 1):
+        retI = 9;
+        break
+      case cube.back.getAt(-1, 1):
+        retI = 10;
+        break
+      case cube.back.getAt(0, 1):
+        retI = 11;
+        break
+      case cube.right.getAt(1, -1):
+        retI = 12;
+        break
+      case cube.front.getAt(1, -1):
+        retI = 13;
+        break
+      case cube.left.getAt(1, -1):
+        retI = 14;
+        break
+      case cube.back.getAt(1, -1):
+        retI = 15;
+        break
+      case cube.bottom.getAt(-1, 1):
+        retI = 16;
+        break
+      case cube.bottom.getAt(1, 0):
+        retI = 17;
+        break
+      case cube.bottom.getAt(0, 1):
+        retI = 18;
+        break
+      case cube.bottom.getAt(1, -1):
+        retI = 19;
+        break
+      default:
+        retI = 0;
+    }
+    return flower[retI];
+  },
+  () => []
+];
+type Step = [axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3];
 class Solver {
   constructor(public cube: Cube) { }
   async solve(startAt: SolveStep = 0) {
+    const state = { v: 0 }
     while (SolveStep[startAt] !== undefined) {
-      const queue: Step[] = []
-      solveStepFuncs[startAt](this.cube, queue) && startAt++
-      let step;
-      while (step = queue.shift()) {
-        await this.cube.rotate(...step)
-      }
+      const queue: Step[] = solveStepFuncs[startAt](this.cube, state).slice();
+      if (queue.length) {
+        let step;
+        while ((step = queue.shift())) {
+          await this.cube.rotate(...step);
+        }
+      } else { startAt++; state.v = 0; }
     }
-
   }
 }
 const front = ref<HTMLCanvasElement>();
@@ -594,8 +770,9 @@ onMounted(async () => {
     const amount = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
     await cube.rotate(axis, start, end, amount);
   }
-  const solver = new Solver(cube)
-  await solver.solve()
+  cube.animationSpeed = 1000;
+  const solver = new Solver(cube);
+  await solver.solve();
 });
 </script>
 <style scoped lang="scss">
