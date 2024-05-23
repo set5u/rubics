@@ -400,13 +400,13 @@ const whiteUp: [
   back: Step[],
   left: Step[],
 ] = [
-    [],
-    [[0, 0, -1, 2]],
-    [[2, 0, -1, 1]],
-    [[0, 0, -1, 3]],
-    [[2, 0, -1, 3]],
-    [[0, 0, -1, 1]],
-  ];
+  [],
+  [[0, 0, -1, 2]],
+  [[2, 0, -1, 1]],
+  [[0, 0, -1, 3]],
+  [[2, 0, -1, 3]],
+  [[0, 0, -1, 1]],
+];
 const flower: [
   rightTop: Step[],
   frontTop: Step[],
@@ -428,26 +428,64 @@ const flower: [
   bottomFront: Step[],
   bottomLeft: Step[],
   bottomBack: Step[],
-] = [[[2, -1, -1, 1]],
-[[0, -1, -1, 1]],
-[[2, 0, 0, 1]],
-[[0, 0, 0, 1]],
-[[1, -1, -1, 3], [0, 0, 0, 3]],
-[[1, -1, -1, 1], [0, -1, -1, 3]],
-[[2, -1, -1, 1]],
-[[1, -1, -1, 2], [2, 0, 0, 1]],
-[[1, -1, -1, 1], [0, -1, -1, 1]],
-[[1, -1, -1, 3], [0, 0, 0, 1]],
-[[1, -1, -1, 2], [2, 0, 0, 3]],
-[[2, -1, -1, 3]],
-[[2, -1, -1, 1]],
-[[1, -1, -1, 1], [0, -1, -1, 1]],
-[[1, -1, -1, 2], [2, 0, 0, 1]],
-[[1, -1, -1, 3], [0, 0, 0, 1]],
-[[2, -1, -1, 2]],
-[[1, -1, -1, 1], [0, -1, -1, 2]],
-[[1, -1, -1, 2], [2, 0, 0, 2]],
-[[1, -1, -1, 3], [0, 0, 0, 2]],];
+] = [
+  [[2, -1, -1, 1]],
+  [[0, -1, -1, 1]],
+  [[2, 0, 0, 1]],
+  [[0, 0, 0, 1]],
+  [
+    [1, -1, -1, 3],
+    [0, 0, 0, 3],
+  ],
+  [
+    [1, -1, -1, 1],
+    [0, -1, -1, 3],
+  ],
+  [[2, -1, -1, 1]],
+  [
+    [1, -1, -1, 2],
+    [2, 0, 0, 1],
+  ],
+  [
+    [1, -1, -1, 1],
+    [0, -1, -1, 1],
+  ],
+  [
+    [1, -1, -1, 3],
+    [0, 0, 0, 1],
+  ],
+  [
+    [1, -1, -1, 2],
+    [2, 0, 0, 3],
+  ],
+  [[2, -1, -1, 3]],
+  [[2, -1, -1, 1]],
+  [
+    [1, -1, -1, 1],
+    [0, -1, -1, 1],
+  ],
+  [
+    [1, -1, -1, 2],
+    [2, 0, 0, 1],
+  ],
+  [
+    [1, -1, -1, 3],
+    [0, 0, 0, 1],
+  ],
+  [[2, -1, -1, 2]],
+  [
+    [1, -1, -1, 1],
+    [0, -1, -1, 2],
+  ],
+  [
+    [1, -1, -1, 2],
+    [2, 0, 0, 2],
+  ],
+  [
+    [1, -1, -1, 3],
+    [0, 0, 0, 2],
+  ],
+];
 const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
   (cube) => {
     let retI: number;
@@ -476,90 +514,93 @@ const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
     return whiteUp[retI];
   },
   (cube) => {
-    const y0 = cube.top.getAt(0, 1) === Color.Y, y1 = cube.top.getAt(1, 0) === Color.Y, y2 = cube.top.getAt(-1, 1) === Color.Y, y3 = cube.top.getAt(1, -1) === Color.Y
+    const y0 = cube.top.getAt(0, 1) === Color.Y,
+      y1 = cube.top.getAt(1, 0) === Color.Y,
+      y2 = cube.top.getAt(-1, 1) === Color.Y,
+      y3 = cube.top.getAt(1, -1) === Color.Y;
     if (y0 && y1 && y2 && y3) {
-      return []
+      return [];
     }
     if (y0 && y2 && y3) {
-      return [[1, 0, -1, 1]]
+      return [[1, 0, -1, 1]];
     }
     if (y2) {
-      return [[1, 0, -1, 3]]
+      return [[1, 0, -1, 3]];
     }
     let retI: number;
     switch (Color.Y) {
       case cube.right.getAt(1, 0):
         retI = 0;
-        break
+        break;
       case cube.front.getAt(1, 0):
         retI = 1;
-        break
+        break;
       case cube.left.getAt(1, 0):
         retI = 2;
-        break
+        break;
       case cube.back.getAt(1, 0):
         retI = 3;
-        break
+        break;
       case cube.right.getAt(-1, 1):
         retI = 4;
-        break
+        break;
       case cube.right.getAt(0, 1):
         retI = 5;
-        break
+        break;
       case cube.front.getAt(-1, 1):
         retI = 6;
-        break
+        break;
       case cube.front.getAt(0, 1):
         retI = 7;
-        break
+        break;
       case cube.left.getAt(-1, 1):
         retI = 8;
-        break
+        break;
       case cube.left.getAt(0, 1):
         retI = 9;
-        break
+        break;
       case cube.back.getAt(-1, 1):
         retI = 10;
-        break
+        break;
       case cube.back.getAt(0, 1):
         retI = 11;
-        break
+        break;
       case cube.right.getAt(1, -1):
         retI = 12;
-        break
+        break;
       case cube.front.getAt(1, -1):
         retI = 13;
-        break
+        break;
       case cube.left.getAt(1, -1):
         retI = 14;
-        break
+        break;
       case cube.back.getAt(1, -1):
         retI = 15;
-        break
+        break;
       case cube.bottom.getAt(-1, 1):
         retI = 16;
-        break
+        break;
       case cube.bottom.getAt(1, 0):
         retI = 17;
-        break
+        break;
       case cube.bottom.getAt(0, 1):
         retI = 18;
-        break
+        break;
       case cube.bottom.getAt(1, -1):
         retI = 19;
-        break
+        break;
       default:
         retI = 0;
     }
     return flower[retI];
   },
-  () => []
+  () => [],
 ];
 type Step = [axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3];
 class Solver {
-  constructor(public cube: Cube) { }
+  constructor(public cube: Cube) {}
   async solve(startAt: SolveStep = 0) {
-    const state = { v: 0 }
+    const state = { v: 0 };
     while (SolveStep[startAt] !== undefined) {
       const queue: Step[] = solveStepFuncs[startAt](this.cube, state).slice();
       if (queue.length) {
@@ -567,7 +608,10 @@ class Solver {
         while ((step = queue.shift())) {
           await this.cube.rotate(...step);
         }
-      } else { startAt++; state.v = 0; }
+      } else {
+        startAt++;
+        state.v = 0;
+      }
     }
   }
 }
@@ -784,7 +828,8 @@ onMounted(async () => {
   transform-style: preserve-3d;
   --rotY: v-bind(rotY);
   --rotX: v-bind(rotX);
-  transform: rotateX(calc(var(--rotX) * 1deg)) rotateY(calc(var(--rotY) * 1deg)) translateX(-25vmin) translateY(-25vmin);
+  transform: rotateX(calc(var(--rotX) * 1deg)) rotateY(calc(var(--rotY) * 1deg))
+    translateX(-25vmin) translateY(-25vmin);
 }
 
 .face {
@@ -805,27 +850,33 @@ onMounted(async () => {
 }
 
 .x0 {
-  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin)) rotate(v-bind(xRotDeg));
+  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin))
+    rotate(v-bind(xRotDeg));
 }
 
 .x1 {
-  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin)) rotate(v-bind(xRotDegMinus));
+  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin))
+    rotate(v-bind(xRotDegMinus));
 }
 
 .y0 {
-  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin)) rotate(v-bind(yRotDeg));
+  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin))
+    rotate(v-bind(yRotDeg));
 }
 
 .y1 {
-  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin)) rotate(v-bind(yRotDegMinus));
+  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin))
+    rotate(v-bind(yRotDegMinus));
 }
 
 .z0 {
-  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin)) rotate(v-bind(zRotDeg));
+  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin))
+    rotate(v-bind(zRotDeg));
 }
 
 .z1 {
-  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin)) rotate(v-bind(zRotDegMinus));
+  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin))
+    rotate(v-bind(zRotDegMinus));
 }
 
 .ix0 {
@@ -879,7 +930,9 @@ onMounted(async () => {
   left: v-bind(topLeft);
   width: v-bind(topWidth);
   height: v-bind(topHeight);
-  transform: translate3d(v-bind(leftRotOffset), v-bind(backRotOffset), -25vmin) rotateY(v-bind(xRotDeg)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(frontRotOffset), 25vmin);
+  transform: translate3d(v-bind(leftRotOffset), v-bind(backRotOffset), -25vmin)
+    rotateY(v-bind(xRotDeg)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(frontRotOffset), 25vmin);
 }
 
 .top2 {
@@ -905,7 +958,9 @@ onMounted(async () => {
   left: v-bind(topLeft);
   width: v-bind(topWidth);
   height: v-bind(topHeight);
-  transform: translate3d(v-bind(leftRotOffset), v-bind(frontRotOffset), -25vmin) rotateY(v-bind(xRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(backRotOffset), 25vmin);
+  transform: translate3d(v-bind(leftRotOffset), v-bind(frontRotOffset), -25vmin)
+    rotateY(v-bind(xRotDegMinus)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(backRotOffset), 25vmin);
 }
 
 .bottom2 {
@@ -931,9 +986,13 @@ onMounted(async () => {
   left: v-bind(frontLeft);
   width: v-bind(frontWidth);
   height: v-bind(frontHeight);
-  transform: translate3d(v-bind(leftRotOffset),
+  transform: translate3d(
+      v-bind(leftRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .front2 {
@@ -959,9 +1018,13 @@ onMounted(async () => {
   left: v-bind(rightLeft);
   width: v-bind(rightWidth);
   height: v-bind(rightHeight);
-  transform: translate3d(v-bind(frontRotOffset),
+  transform: translate3d(
+      v-bind(frontRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDegMinus)) translate3d(v-bind(backRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDegMinus))
+    translate3d(v-bind(backRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .right2 {
@@ -987,9 +1050,13 @@ onMounted(async () => {
   right: v-bind(frontLeft);
   width: v-bind(frontWidth);
   height: v-bind(frontHeight);
-  transform: translate3d(v-bind(rightRotOffset),
+  transform: translate3d(
+      v-bind(rightRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDegMinus)) translate3d(v-bind(leftRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDegMinus))
+    translate3d(v-bind(leftRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .back2 {
@@ -1015,9 +1082,13 @@ onMounted(async () => {
   right: v-bind(rightLeft);
   width: v-bind(rightWidth);
   height: v-bind(rightHeight);
-  transform: translate3d(v-bind(backRotOffset),
+  transform: translate3d(
+      v-bind(backRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDeg)) translate3d(v-bind(frontRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDeg))
+    translate3d(v-bind(frontRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .left2 {
@@ -1030,7 +1101,7 @@ onMounted(async () => {
 <style lang="scss">
 html,
 body,
-body> :first-child {
+body > :first-child {
   height: 100%;
   background-color: #555;
 }
