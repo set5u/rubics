@@ -398,7 +398,8 @@ enum SolveStep {
   WHITE_UP,
   FLOWER,
   FLOWER_DOWN,
-  DOWN_CORNER
+  DOWN_CORNER,
+  EDGE,
 }
 const whiteUp: Step[][] = [
   [],
@@ -468,6 +469,8 @@ const flower: Step[][] = [
 ];
 const rightStep: Step[] = [[1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 3], [2, -1, -1, 3],]
 const leftStep: Step[] = [[1, -1, -1, 3], [2, 0, 0, 1], [1, -1, -1, 1], [2, 0, 0, 3],]
+const insertRightEdge: Step[] = [...rightStep, [1, 0, -1, 1], ...leftStep]
+const insertLeftEdge: Step[] = [...leftStep, [1, 0, -1, 3], ...rightStep]
 const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
   (cube) => {
     let retI: number;
@@ -655,6 +658,48 @@ const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
         state.v++
         return [[1, -1, -1, 1]]
     }
+  },
+  (cube, state) => {
+    if (state.v === 20) {
+      return []
+    }
+    if (state.v % 5 === 4) {
+      state.v -= 4
+
+      if (state.v === 0) {
+        return [...insertRightEdge, ...insertRightEdge, ...insertRightEdge, ...insertRightEdge]
+      }
+      if (state.v === 5) {
+        return [...insertRightEdge, ...insertRightEdge, ...insertRightEdge, [1, 0, -1, 1]]
+      }
+      if (state.v === 10) {
+        return [...insertRightEdge, ...insertRightEdge, [1, 0, -1, 2]]
+      }
+      if (state.v === 15) {
+        return [...insertRightEdge, [1, 0, -1, 3]]
+      }
+    }
+    const fc = cube.front.getAt(1, 1)
+    const rc = cube.right.getAt(1, 1)
+    const fr = cube.front.getAt(-1, 1)
+    const rl = cube.right.getAt(0, 1)
+    if (fc === fr && rc === rl) {
+      state.v = Math.floor(state.v / 5 + 1) * 5
+      return state.v === 20 ? [] : [[1, 0, -1, 1]]
+    }
+    const ft = cube.front.getAt(1, 0)
+    const tf = cube.top.getAt(1, -1)
+    if (ft === fc && tf === rc) {
+      return insertRightEdge
+    }
+    const rt = cube.right.getAt(1, 0)
+    const tr = cube.top.getAt(-1, 1)
+    if (rt === rc && tr === fc) {
+      state.v = Math.floor(state.v / 5 + 1) * 5
+      return state.v === 20 ? [[1, 0, -1, 1], ...insertLeftEdge,] : [[1, 0, -1, 1], ...insertLeftEdge, [1, 0, -1, 1]]
+    }
+    state.v++
+    return [[1, -1, -1, 1]]
   }
 ];
 type Step = [axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3];
@@ -876,10 +921,12 @@ onMounted(async () => {
       const amount = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
       await cube.rotate(axis, start, end, amount);
     }
-    cube.animationSpeed = 100;
+    cube.animationSpeed = 50;
     const solver = new Solver(cube);
     await solver.solve();
-    break
+    await new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 1000)
+    })
   }
 });
 </script>
