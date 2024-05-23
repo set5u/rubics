@@ -402,6 +402,7 @@ enum SolveStep {
   EDGE,
   WHITE_X,
   WHITE_EDGE,
+  YELLOW_UP,
 }
 const whiteUp: Step[][] = [
   [],
@@ -757,7 +758,8 @@ const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
         return [[1, -1, -1, 1]]
 
     }
-  }
+  },
+  (cube) => cube.top.getAt(1, 1) === "W" ? [[0, 0, -1, 2]] : []
 ];
 type Step = [axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3];
 class Solver {
