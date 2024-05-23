@@ -398,6 +398,7 @@ enum SolveStep {
   WHITE_UP,
   FLOWER,
   FLOWER_DOWN,
+  DOWN_CORNER
 }
 const whiteUp: Step[][] = [
   [],
@@ -465,6 +466,8 @@ const flower: Step[][] = [
     [0, 0, 0, 2],
   ],
 ];
+const rightStep: Step[] = [[1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 3], [2, -1, -1, 3],]
+const leftStep: Step[] = [[1, -1, -1, 3], [2, 0, 0, 1], [1, -1, -1, 1], [2, 0, 0, 3],]
 const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
   (cube) => {
     let retI: number;
@@ -607,6 +610,52 @@ const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
     }
     return [];
   },
+  (cube, state) => {
+    if (state.v === 20) {
+      return []
+    }
+    if (state.v % 5 === 4) {
+
+      state.v -= 4
+      if (state.v === 0) {
+        return [[1, 0, -1, 1], ...rightStep, [1, 0, -1, 1], ...rightStep, [1, 0, -1, 1], ...rightStep, [1, 0, -1, 1]]
+      }
+      if (state.v === 5) {
+        return [[1, 0, -1, 1], ...rightStep, [1, 0, -1, 1], ...rightStep, [1, 0, -1, 2]]
+      }
+      if (state.v === 10) {
+        return [[1, 0, -1, 1], ...rightStep, [1, 0, -1, 3]]
+      }
+    }
+    const c1 = cube.front.getAt(1, -1)
+    const c2 = cube.right.getAt(1, -1)
+    const b1 = cube.front.getAt(-1, -1)
+    const b2 = cube.right.getAt(0, -1)
+    const b3 = cube.bottom.getAt(-1, 0)
+    const a1 = cube.top.getAt(-1, -1)
+    const a2 = cube.front.getAt(-1, 0)
+    const a3 = cube.right.getAt(0, 0)
+    switch (c1 + c2) {
+      case b1 + b2:
+        state.v = Math.floor(state.v / 5 + 1) * 5
+        return state.v === 20 ? [] : [[1, 0, -1, 1]]
+      case b3 + b1:
+        state.v = Math.floor(state.v / 5 + 1) * 5
+        return [[1, 0, -1, 1], ...leftStep, ...leftStep]
+      case b2 + b3:
+        return [...rightStep, ...rightStep]
+      case a3 + a2:
+        return [...rightStep, ...rightStep, ...rightStep]
+      case a2 + a1:
+        state.v = Math.floor(state.v / 5 + 1) * 5
+        return [[1, 0, -1, 1], ...leftStep]
+      case a1 + a3:
+        return rightStep
+      default:
+        state.v++
+        return [[1, -1, -1, 1]]
+    }
+  }
 ];
 type Step = [axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3];
 class Solver {
@@ -827,9 +876,10 @@ onMounted(async () => {
       const amount = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
       await cube.rotate(axis, start, end, amount);
     }
-    cube.animationSpeed = 1000;
+    cube.animationSpeed = 100;
     const solver = new Solver(cube);
     await solver.solve();
+    break
   }
 });
 </script>
