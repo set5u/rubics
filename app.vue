@@ -1030,7 +1030,6 @@ onMounted(async () => {
     await new Promise<void>((resolve) => {
       setTimeout(() => resolve(), 1000)
     })
-    break
   }
 });
 </script>
