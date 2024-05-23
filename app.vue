@@ -403,6 +403,9 @@ enum SolveStep {
   WHITE_X,
   WHITE_EDGE,
   YELLOW_UP,
+  WHITE_DOWN,
+  LAST_CORNER,
+  LAST,
 }
 const whiteUp: Step[][] = [
   [],
@@ -477,6 +480,7 @@ const insertLeftEdge: Step[] = [...leftStep, [1, 0, -1, 3], ...rightStep]
 const whiteX: Step[] = [[0, -1, -1, 1], ...rightStep, [0, -1, -1, 3]]
 const whiteX2: Step[] = [[0, -1, -1, 1], ...rightStep, ...rightStep, [0, -1, -1, 3]]
 const whiteEdge: Step[] = [[1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 2], [2, -1, -1, 3], [1, -1, -1, 3], [2, -1, -1, 1], [1, -1, -1, 3], [2, -1, -1, 3]]
+const rightStep3: Step[] = [...rightStep, ...rightStep, ...rightStep]
 const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
   (cube) => {
     let retI: number;
@@ -759,7 +763,47 @@ const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
 
     }
   },
-  (cube) => cube.top.getAt(1, 1) === "W" ? [[0, 0, -1, 2]] : []
+  (cube) => cube.top.getAt(1, 1) === "W" ? [[0, 0, -1, 2]] : [],
+  (cube, state) => {
+    if (state.v === 4) {
+      return []
+    }
+    if (cube.bottom.getAt(-1, 0) === "W") {
+      state.v++
+      return [[1, 0, 0, 1]]
+    } else {
+      return rightStep
+    }
+  },
+  (cube, state) => {
+    const fb = cube.front.getAt(1, -1)
+    const fc = cube.front.getAt(-1, -1)
+    if (fb === fc) {
+      state.v++
+      return state.v === 4 ? [] : [[1, 0, 0, 1]]
+    } else {
+      state.v = 0
+      return [...rightStep3, [1, 0, 0, 1], ...rightStep3, [1, 0, 0, 3], ...rightStep3, [1, 0, 0, 1]]
+    }
+  },
+  (cube) => {
+    const c = cube.front.getAt(1, 1)
+    const f = cube.front.getAt(1, -1)
+    const r = cube.right.getAt(1, -1)
+    const b = cube.back.getAt(1, -1)
+    const l = cube.left.getAt(1, -1)
+    switch (c) {
+      case f:
+        return []
+      case r:
+        return [[1, 0, 0, 1]]
+      case b:
+        return [[1, 0, 0, 2]]
+      case l:
+        return [[1, 0, 0, 3]]
+    }
+    return []
+  }
 ];
 type Step = [axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3];
 class Solver {
