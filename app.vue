@@ -1,5 +1,5 @@
 <template lang="pug">
-.h-full(@pointer-down.capture.prevent)
+.h-full(@scroll.prevent)
   .hidden
     canvas(ref="top")
     canvas(ref="bottom")
@@ -57,6 +57,7 @@
         canvas.split.left0(ref="leftSplit0")
         canvas.split.middle.left1(ref="leftSplit1")
         canvas.split.left2(ref="leftSplit2")
+  input.fixed.top-0(v-model="animationSpeed" type="range" min="0" max="10" )
 </template>
 <script setup lang="ts">
 const { x, y, pressure } = usePointer();
@@ -630,7 +631,7 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
     }
     const ci = Math.floor((cube.size - 1) / 2)
     const x = 1 - cube.size % 2 + state.v + ci
-    const y = (state.w - 4) % (cube.size - 2 * (ci - state.v) + 1 - cube.size % 2) + ci - state.v
+    const y = (state.w - 4) % (cube.size - 2 * (ci - state.v)) + ci - state.v
     switch (w) {
       case cube.top.getAt(x, y):
         state.w++
@@ -1156,6 +1157,7 @@ const backSplit2 = ref<HTMLCanvasElement>();
 const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
+const animationSpeed = ref(4)
 onMounted(async () => {
   const size = 64;
   const cube = new Cube(
@@ -1201,8 +1203,10 @@ onMounted(async () => {
     },
     size,
   );
+  watchEffect(() => {
+    cube.animationSpeed = 2 ** animationSpeed.value
+  })
   while (true) {
-    cube.animationSpeed = 1;
     for (let i = 0; i < size * 4; i++) {
       const axis = Math.floor(Math.random() * 3) as 0 | 1 | 2;
       const start = Math.floor(Math.random() * size);
@@ -1210,12 +1214,8 @@ onMounted(async () => {
       const amount = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
       await cube.rotate(axis, start, end, amount);
     }
-    cube.animationSpeed = 50;
     const solver = new Solver(cube);
     await solver.solve();
-    await cube.rotate(1, 0, -1, 2)
-    await cube.rotate(1, 0, -1, 2)
-    await cube.rotate(2, 0, -1, 2)
     await new Promise<void>((resolve) => {
       setTimeout(() => resolve(), 1000)
     })
