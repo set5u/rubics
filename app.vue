@@ -395,17 +395,19 @@ class Cube {
   }
 }
 enum SolveStep {
-  WHITE_UP,
-  FLOWER,
-  FLOWER_DOWN,
-  DOWN_CORNER,
-  EDGE,
-  WHITE_X,
-  WHITE_EDGE,
-  YELLOW_UP,
-  WHITE_DOWN,
-  LAST_CORNER,
-  LAST,
+  BIG_WHITE_UP,
+  FACE,
+  // WHITE_UP,
+  // FLOWER,
+  // FLOWER_DOWN,
+  // DOWN_CORNER,
+  // EDGE,
+  // WHITE_X,
+  // WHITE_EDGE,
+  // YELLOW_UP,
+  // WHITE_DOWN,
+  // LAST_CORNER,
+  // LAST,
 }
 const whiteUp: Step[][] = [
   [],
@@ -481,7 +483,154 @@ const whiteX: Step[] = [[0, -1, -1, 1], ...rightStep, [0, -1, -1, 3]]
 const whiteX2: Step[] = [[0, -1, -1, 1], ...rightStep, ...rightStep, [0, -1, -1, 3]]
 const whiteEdge: Step[] = [[1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 2], [2, -1, -1, 3], [1, -1, -1, 3], [2, -1, -1, 1], [1, -1, -1, 3], [2, -1, -1, 3]]
 const rightStep3: Step[] = [...rightStep, ...rightStep, ...rightStep]
-const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
+const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) => (Step | null)[])[] = [
+  (cube) => {
+    if (cube.size % 2) {
+      let retI: number;
+      const c = cube.size * .5 - .5
+      switch (Color.W) {
+        case cube.top.getAt(c, c):
+          retI = 0;
+          break;
+        case cube.bottom.getAt(c, c):
+          retI = 1;
+          break;
+        case cube.front.getAt(c, c):
+          retI = 2;
+          break;
+        case cube.right.getAt(c, c):
+          retI = 3;
+          break;
+        case cube.back.getAt(c, c):
+          retI = 4;
+          break;
+        case cube.left.getAt(c, c):
+          retI = 5;
+          break;
+        default:
+          retI = 0;
+      }
+      return whiteUp[retI];
+    }
+    return []
+  },
+  (cube, state) => {
+    if (cube.size < 4) {
+      return []
+    }
+    // v: 内側から何番目
+    // w: そのなかでいくつめ
+    // f: どの面か
+    const c = Math.floor(cube.size / 2) - state.v - 1
+    const nc = cube.size - c - 1
+    if (state.v === Math.floor(cube.size / 2) - 1) {
+      state.f++
+      state.v = 0
+      state.w = 0
+      if (cube.size % 2) {
+        const n = (["W", "R", "B", "O", "G", "Y"] as const)[state.f]
+        const c = cube.size * .5 - .5
+        switch (n) {
+          case cube.front.getAt(c, c):
+            return [[2, 0, -1, 1]]
+          case cube.left.getAt(c, c):
+            return [[0, 0, -1, 1]]
+          case cube.back.getAt(c, c):
+            return [[2, 0, -1, 3]]
+          case cube.right.getAt(c, c):
+            return [[0, 0, -1, 3]]
+        }
+      } else {
+        switch (state.f) {
+          case 1:
+            return [[2, 0, -1, 1]]
+          case 2:
+          case 3:
+          case 4:
+            return [[0, 0, -1, 3]]
+          case 5:
+            return []
+        }
+      }
+    }
+    const w = (["W", "R", "B", "O", "G", "Y"] as const)[state.f]
+    const c0 = cube.top.getAt(c, c) === w ? "T" : "F"
+    const c1 = cube.top.getAt(nc, c) === w ? "T" : "F"
+    const c2 = cube.top.getAt(nc, nc) === w ? "T" : "F"
+    const c3 = cube.top.getAt(c, nc) === w ? "T" : "F"
+    if (state.w < 4) {
+      switch (c0 + c1 + c2 + c3) {
+        case "TTTT":
+          state.w++
+          return [null]
+        case "TTFT":
+        case "TTFF":
+        case "TFFF":
+          return [[1, -1, -1, 1]]
+        case "TFTT":
+        case "TFFT":
+        case "FFFT":
+          return [[1, -1, -1, 2]]
+        case "FTTT":
+        case "FFTT":
+        case "FFTF":
+          return [[1, -1, -1, 3]]
+      }
+      switch (w) {
+        case cube.front.getAt(nc, c):
+          state.w++
+          return [[2, nc, nc, 1], [1, -1, -1, 3], [2, nc, nc, 3]]
+        case cube.front.getAt(nc, nc):
+          return [[0, -1, -1, 3]]
+        case cube.front.getAt(c, nc):
+          return [[0, -1, -1, 2]]
+        case cube.front.getAt(c, c):
+          return [[0, -1, -1, 1]]
+        case cube.bottom.getAt(nc, c):
+          state.w++
+          return [[2, nc, nc, 2], [1, -1, -1, 3], [2, nc, nc, 2]]
+        case cube.bottom.getAt(nc, nc):
+          return [[1, 0, 0, 1]]
+        case cube.bottom.getAt(c, nc):
+          return [[1, 0, 0, 2]]
+        case cube.bottom.getAt(c, c):
+          return [[1, 0, 0, 3]]
+        case cube.left.getAt(nc, c):
+        case cube.left.getAt(nc, nc):
+        case cube.left.getAt(c, nc):
+        case cube.left.getAt(c, c):
+          return [[1, 0, -2, 3]]
+        case cube.back.getAt(nc, c):
+        case cube.back.getAt(nc, nc):
+        case cube.back.getAt(c, nc):
+        case cube.back.getAt(c, c):
+          return [[1, 0, -2, 2]]
+        case cube.right.getAt(nc, c):
+        case cube.right.getAt(nc, nc):
+        case cube.right.getAt(c, nc):
+        case cube.right.getAt(c, c):
+          return [[1, 0, -2, 1]]
+      }
+    } else {
+      const el = (state.v * 2 + 2 - (cube.size % 2))
+      if (state.w === el + 4 || state.w === el * 2 + 4 || state.w === el * 3 + 4) {
+        state.w++
+        return [[1, -1, -1, 1]]
+      }
+      const wi = (state.w - 4) % el - state.v
+      if (state.w === el * 4 + 4) {
+        state.v++
+        state.w = 0
+        return [null]
+      }
+      const ci = Math.floor((cube.size - 1) * .5)
+      console.log(ci, wi)
+      state.w++
+
+      return []
+    }
+    return []
+  },
   (cube) => {
     let retI: number;
     switch (Color.W) {
@@ -508,7 +657,7 @@ const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
     }
     return whiteUp[retI];
   },
-  (cube, state) => {
+  (cube) => {
     const y0 = cube.top.getAt(0, 1) === Color.Y,
       y1 = cube.top.getAt(1, 0) === Color.Y,
       y2 = cube.top.getAt(-1, 1) === Color.Y,
@@ -524,6 +673,18 @@ const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
     }
     let retI: number;
     switch (Color.Y) {
+      case cube.left.getAt(-1, 1):
+        retI = 8;
+        break;
+      case cube.left.getAt(0, 1):
+        retI = 9;
+        break;
+      case cube.back.getAt(-1, 1):
+        retI = 10;
+        break;
+      case cube.back.getAt(0, 1):
+        retI = 11;
+        break;
       case cube.right.getAt(1, 0):
         retI = 0;
         break;
@@ -547,18 +708,6 @@ const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
         break;
       case cube.front.getAt(0, 1):
         retI = 7;
-        break;
-      case cube.left.getAt(-1, 1):
-        retI = 8;
-        break;
-      case cube.left.getAt(0, 1):
-        retI = 9;
-        break;
-      case cube.back.getAt(-1, 1):
-        retI = 10;
-        break;
-      case cube.back.getAt(0, 1):
-        retI = 11;
         break;
       case cube.right.getAt(1, -1):
         retI = 12;
@@ -587,18 +736,6 @@ const solveStepFuncs: ((cube: Cube, state: { v: number }) => Step[])[] = [
       default:
         retI = 0;
     }
-    if (state.v === retI) {
-      const c = Math.floor(Math.random() * 2) - 1
-      return [
-        [
-          Math.floor(Math.random() * 3) as 0 | 1 | 2,
-          c,
-          c,
-          Math.floor(Math.random() * 3) + 1 as 1 | 2 | 3,
-        ],
-      ];
-    }
-    state.v = retI;
     return flower[retI];
   },
   (cube, state) => {
@@ -809,17 +946,19 @@ type Step = [axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3];
 class Solver {
   constructor(public cube: Cube) { }
   async solve(startAt: SolveStep = 0) {
-    const state = { v: 0 };
+    const state = { v: 0, w: 0, f: 0 };
     while (SolveStep[startAt] !== undefined) {
-      const queue: Step[] = solveStepFuncs[startAt](this.cube, state).slice();
-      if (queue.length) {
-        let step;
+      const queue: (Step | null)[] = solveStepFuncs[startAt](this.cube, state).slice();
+      if (queue[0] === null || queue.length) {
+        let step: Step | null | undefined;
         while ((step = queue.shift())) {
-          await this.cube.rotate(...step);
+          step && await this.cube.rotate(...step);
         }
       } else {
         startAt++;
         state.v = 0;
+        state.w = 0
+        state.f = 0
       }
     }
   }
@@ -971,7 +1110,7 @@ const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 onMounted(async () => {
-  const size = 3;
+  const size = 11;
   const cube = new Cube(
     [
       front.value!,
@@ -1030,6 +1169,7 @@ onMounted(async () => {
     await new Promise<void>((resolve) => {
       setTimeout(() => resolve(), 1000)
     })
+    break
   }
 });
 </script>
