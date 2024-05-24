@@ -611,23 +611,6 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
         case cube.right.getAt(c, c):
           return [[1, 0, -2, 1]]
       }
-    } else {
-      const el = (state.v * 2 + 2 - (cube.size % 2))
-      if (state.w === el + 4 || state.w === el * 2 + 4 || state.w === el * 3 + 4) {
-        state.w++
-        return [[1, -1, -1, 1]]
-      }
-      const wi = (state.w - 4) % el - state.v
-      if (state.w === el * 4 + 4) {
-        state.v++
-        state.w = 0
-        return [null]
-      }
-      const ci = Math.floor((cube.size - 1) * .5)
-      console.log(ci, wi)
-      state.w++
-
-      return []
     }
     return []
   },
@@ -1110,7 +1093,7 @@ const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 onMounted(async () => {
-  const size = 11;
+  const size = 12;
   const cube = new Cube(
     [
       front.value!,
