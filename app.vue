@@ -57,17 +57,14 @@
         canvas.split.left0(ref="leftSplit0")
         canvas.split.middle.left1(ref="leftSplit1")
         canvas.split.left2(ref="leftSplit2")
-  input.fixed.top-0(v-model="animationSpeed" type="range" min="0" max="10" )
+  input.fixed.top-0(v-model="animationSpeed" type="range" min="0" max="10")
+  div.fixed.top-0.right-0
+    input(v-model="rotY" type="range" min="-180" max="180")
+    input(v-model="rotX" type="range" min="-90" max="90")
 </template>
 <script setup lang="ts">
-const { x, y, pressure } = usePointer();
 const rotY = ref(-45);
 const rotX = ref(-45);
-watch([x, y], ([x, y], [ox, oy]) => {
-  if (!pressure.value) return;
-  rotY.value += (x - ox) / 2;
-  rotX.value -= (y - oy) / 2;
-});
 enum Color {
   R = "R",
   G = "G",
