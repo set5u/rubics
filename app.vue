@@ -1176,8 +1176,8 @@ class Solver {
         while ((step = queue.shift())) {
           step && await this.cube.rotate(...step);
         }
-        // TODO: パリティ処理
       } else {
+        // TODO: パリティ処理
         startAt++;
         state.v = 0;
         state.w = 0
