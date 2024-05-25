@@ -313,6 +313,7 @@ class Cube {
     this.animParams.y1Offset.value = 1;
     this.animParams.z0Offset.value = 1;
     this.animParams.z1Offset.value = 1;
+    this.animParams.rotAxis.value = 0
     if (start === 0) {
       [this.back, this.bottom, this.left][axis].rotate(
         (4 - amount) as 1 | 2 | 3,
@@ -404,17 +405,18 @@ enum SolveStep {
   BIG_WHITE_UP,
   FACE,
   BIG_EDGE,
-  // WHITE_UP,
-  // FLOWER,
-  // FLOWER_DOWN,
-  // DOWN_CORNER,
-  // EDGE,
-  // WHITE_X,
-  // WHITE_EDGE,
-  // YELLOW_UP,
-  // WHITE_DOWN,
-  // LAST_CORNER,
-  // LAST,
+  EDGE_PARITY,
+  WHITE_UP,
+  FLOWER,
+  FLOWER_DOWN,
+  DOWN_CORNER,
+  EDGE,
+  WHITE_X,
+  WHITE_EDGE,
+  YELLOW_UP,
+  WHITE_DOWN,
+  LAST_CORNER,
+  LAST,
 }
 const whiteUp: Step[][] = [
   [],
@@ -525,9 +527,6 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
     if (cube.size < 4 || state.f === 5) {
       return []
     }
-    // v: 内側から何番目
-    // w: そのなかでいくつめ
-    // f: どの面か
     const c = Math.floor((cube.size - 1) / 2) - state.v
     const nc = ~c
     if (state.v === Math.floor((cube.size - 1) / 2)) {
@@ -535,6 +534,9 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
       state.v = 0
       state.w = 0
       if (cube.size % 2) {
+        if (state.f === 5) {
+          return []
+        }
         const n = (["W", "R", "B", "O", "G", "Y"] as const)[state.f]
         const c = cube.size * .5 - .5
         switch (n) {
@@ -546,8 +548,6 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
             return [[2, 0, -1, 3]]
           case cube.right.getAt(c, c):
             return [[0, 0, -1, 3]]
-          default:
-            return []
         }
       } else {
         switch (state.f) {
@@ -686,18 +686,169 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
     return []
   },
   (cube, state) => {
-    // w:その中で何番目か
-    // f:何番目の辺か
-    if (state.f === 12) {
+    if (cube.size < 4) {
       return []
     }
+    const c1 = cube.top.getAt(Math.floor((cube.size - 1) / 2), -1)
+    const c2 = cube.front.getAt(Math.floor((cube.size - 1) / 2), 0)
     if (state.w === cube.size - 2) {
-      // 次の辺を探索　-> 揃っていたらf++,見つかったらwを0にする。
+      let isFinished = true
+      loop: for (let i = 1; i < cube.size - 1; i++) {
+        const u1 = cube.top.getAt(i, -1)
+        const u2 = cube.front.getAt(i, 0)
+        switch (c1 + c2) {
+          case u1 + u2:
+          case u2 + u1:
+            continue loop
+          default:
+            isFinished = false
+            break loop
+        }
+      }
+      if (isFinished) {
+        state.f++
+        switch (state.f) {
+          case 1:
+          case 2:
+          case 3:
+          case 5:
+          case 6:
+          case 7:
+            return [[0, -1, -1, 1]]
+          case 4:
+            return [[1, 0, -1, 2]]
+          case 8:
+            return [[1, 0, -1, 1]]
+          case 9:
+          case 10:
+            return [[2, 0, -1, 1]]
+          case 11:
+            return []
+        }
+      } else {
+        state.w = 0
+        state.f = 0
+        return [null]
+      }
+
     }
-    // w番目の辺を揃える
-    // 1. 揃ってたらw++
-    // 2. 位置にあったら動作
-    // 3. 探して位置に持っていく
+    const y = state.w + 1
+    const ny = ~y
+    const u1 = cube.top.getAt(y, -1)
+    const u2 = cube.front.getAt(y, 0)
+    const f1 = cube.front.getAt(-1, ny)
+    const f2 = cube.right.getAt(0, ny)
+    const rrc = cube.right.getAt(-1, ny)
+    const blc = cube.back.getAt(0, ny)
+    const brc = cube.back.getAt(-1, ny)
+    const llc = cube.left.getAt(0, ny)
+    const lrc = cube.left.getAt(-1, ny)
+    const flc = cube.front.getAt(0, ny)
+    const frn = cube.front.getAt(-1, y)
+    const rln = cube.right.getAt(0, y)
+    const rrn = cube.right.getAt(-1, y)
+    const bln = cube.back.getAt(0, y)
+    const brn = cube.back.getAt(-1, y)
+    const lln = cube.left.getAt(0, y)
+    const lrn = cube.left.getAt(-1, y)
+    const fln = cube.front.getAt(0, y)
+    const trc = cube.top.getAt(-1, y)
+    const rtc = cube.right.getAt(ny, 0)
+    const orc = cube.bottom.getAt(-1, ny)
+    const rbc = cube.right.getAt(ny, -1)
+    const trn = cube.top.getAt(-1, ny)
+    const rtn = cube.right.getAt(y, 0)
+    const orn = cube.bottom.getAt(-1, y)
+    const rbn = cube.right.getAt(y, -1)
+    const ttc = cube.top.getAt(y, 0)
+    const btc = cube.back.getAt(ny, 0)
+    const bbc = cube.back.getAt(ny, -1)
+    const obc = cube.bottom.getAt(y, -1)
+    const ttn = cube.top.getAt(ny, 0)
+    const btn = cube.back.getAt(y, 0)
+    const bbn = cube.back.getAt(y, -1)
+    const obn = cube.bottom.getAt(ny, -1)
+    const tlc = cube.top.getAt(0, ny)
+    const ltc = cube.left.getAt(ny, 0)
+    const lbc = cube.left.getAt(ny, -1)
+    const olc = cube.bottom.getAt(0, y)
+    const tln = cube.top.getAt(0, y)
+    const ltn = cube.left.getAt(y, 0)
+    const lbn = cube.left.getAt(y, -1)
+    const oln = cube.bottom.getAt(0, ny)
+    const fbc = cube.front.getAt(y, -1)
+    const otc = cube.bottom.getAt(y, 0)
+    const fbn = cube.front.getAt(ny, -1)
+    const otn = cube.bottom.getAt(ny, 0)
+    switch (c1 + c2) {
+      case u1 + u2:
+      case u2 + u1:
+        state.w++
+        return [null]
+      case f1 + f2:
+      case f2 + f1:
+        return [[1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 3], [2, ny, ny, 3],
+        [1, 0, -1, 1], ...leftStep, [1, 0, -1, 3], [2, ny, ny, 1], [0, 0, 0, 1], [1, 0, -2, 1],
+        [2, 0, 0, 3], [0, 0, -2, 1], [1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 3], [2, ny, ny, 3],
+        [1, 0, -1, 1], ...leftStep, [1, 0, -1, 3], [2, ny, ny, 1], [0, -1, -1, 2], [2, 0, -1, 1]]
+      case rrc + blc:
+      case blc + rrc:
+        return [[1, 0, -2, 1]]
+      case brc + llc:
+      case llc + brc:
+        return [[1, 0, -2, 2]]
+      case lrc + flc:
+      case flc + lrc:
+        return [[1, 0, -2, 3]]
+      case frn + rln:
+      case rln + frn:
+      case rrn + bln:
+      case bln + rrn:
+        return [[2, -1, -1, 2]]
+      case brn + lln:
+      case lln + brn:
+      case lrn + fln:
+      case fln + lrn:
+        return [[2, 0, 0, 2]]
+      case trc + rtc:
+      case rtc + trc:
+      case orc + rbc:
+      case rbc + orc:
+        return [[2, -1, -1, 1]]
+      case trn + rtn:
+      case rtn + trn:
+      case orn + rbn:
+      case rbn + orn:
+        return [[2, -1, -1, 3]]
+      case ttc + btc:
+      case btc + ttc:
+      case bbc + obc:
+      case obc + bbc:
+        return [[0, 0, 0, 1]]
+      case ttn + btn:
+      case btn + ttn:
+      case bbn + obn:
+      case obn + bbn:
+        return [[0, 0, 0, 3]]
+      case tlc + ltc:
+      case ltc + tlc:
+      case lbc + olc:
+      case olc + lbc:
+        return [[2, 0, 0, 1]]
+      case tln + ltn:
+      case ltn + tln:
+      case lbn + oln:
+      case oln + lbn:
+        return [[2, 0, 0, 3]]
+      case fbc + otc:
+      case otc + fbc:
+      case fbn + otn:
+      case otn + fbn:
+        return [[1, 0, 0, 1]]
+    }
+    return []
+  },
+  () => {
     return []
   },
   (cube) => {
@@ -937,10 +1088,11 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
         return [[1, -1, -1, 2]]
       case "WWNN":
         return [[1, -1, -1, 3]]
-      // TODO: パリティ
     }
-
-    return []
+    const ci = Math.floor((cube.size - 2) / 2)
+    const nci = ~ci
+    return [[2, 1, ci, 2], [0, 0, 0, 2], [1, -1, -1, 2], [2, nci, -2, 3], [1, -1, -1, 2], [2, 1, ci, 3], [1, -1, -1, 2],
+    [2, 1, ci, 1], [1, -1, -1, 2], [0, -1, -1, 2], [2, 1, ci, 1], [0, -1, -1, 2], [2, nci, -2, 1], [0, 0, 0, 2], [2, 1, ci, 2]]
   },
   (cube) => {
     const t = cube.back.getAt(1, 0)
@@ -989,6 +1141,7 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
       return state.v === 4 ? [] : [[1, 0, 0, 1]]
     } else {
       state.v = 0
+      state.w++
       return [...rightStep3, [1, 0, 0, 1], ...rightStep3, [1, 0, 0, 3], ...rightStep3, [1, 0, 0, 1]]
     }
   },
@@ -1023,6 +1176,7 @@ class Solver {
         while ((step = queue.shift())) {
           step && await this.cube.rotate(...step);
         }
+        // TODO: パリティ処理
       } else {
         startAt++;
         state.v = 0;
@@ -1180,7 +1334,7 @@ const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 const animationSpeed = ref(4)
 onMounted(async () => {
-  const size = 5;
+  const size = 16;
   const cube = new Cube(
     [
       front.value!,
