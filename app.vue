@@ -96,6 +96,7 @@ class Face {
   ocanvas: HTMLCanvasElement;
   octx: CanvasRenderingContext2D;
   rot: 0 | 1 | 2 | 3 = 0;
+  rotInternal: 0 | 1 | 2 | 3 = 0
   constructor(
     public canvas: HTMLCanvasElement,
     public splits: HTMLCanvasElement[],
@@ -110,20 +111,6 @@ class Face {
     this.octx = this.ocanvas.getContext("2d")!;
     this.render(1, 1, 0);
   }
-  forceRender() {
-    const pixelSize = this.canvas.width / this.size;
-    for (let coordX = 0; coordX < this.size; coordX++) {
-      for (let coordY = 0; coordY < this.size; coordY++) {
-        this.ctx.fillStyle = i2color[this.data[coordX + coordY * this.size]];
-        this.ctx.fillRect(
-          coordX * pixelSize,
-          coordY * pixelSize,
-          pixelSize,
-          pixelSize,
-        );
-      }
-    }
-  }
   getIndexAt(x: number, y: number) {
     if (x < 0) {
       x = this.size + x;
@@ -131,7 +118,7 @@ class Face {
     if (y < 0) {
       y = this.size + y;
     }
-    switch (this.rot) {
+    switch ((this.rot + 4 - this.rotInternal) % 4 as 0 | 1 | 2 | 3) {
       case 0:
         return x + this.size * y;
       case 1:
@@ -211,6 +198,92 @@ class Face {
     }
   }
 }
+const axisMap: ([0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2] | undefined)[][] = [[
+  ,
+  [0, 1, 2],
+  [0, 2, 1],
+  ,
+  [0, 1, 2],
+  [0, 2, 1]
+], [
+  [1, 0, 2],
+  ,
+  [1, 2, 0],
+  [1, 0, 2],
+  ,
+  [1, 2, 0]
+], [
+  [2, 0, 1],
+  [2, 1, 0],
+  ,
+  [2, 0, 1],
+  [2, 1, 0],
+  ,
+], [
+  ,
+  [0, 1, 2],
+  [0, 2, 1],
+  ,
+  [0, 1, 2],
+  [0, 2, 1],
+], [
+  [1, 0, 2],
+  ,
+  [1, 2, 0],
+  [1, 0, 2],
+  ,
+  [1, 2, 0]
+], [
+  [2, 0, 1],
+  [2, 1, 0],
+  ,
+  [2, 0, 1],
+  [2, 1, 0],
+  ,
+],]
+const invMap: ([boolean, boolean, boolean] | undefined)[][] = [[
+  ,
+  [false, false, false],
+  [false, false, true],
+  ,
+  [false, true, true],
+  [false, true, false]
+], [
+  [false, false, true],
+  ,
+  [false, false, false],
+  [false, true, false],
+  ,
+  [false, true, true]
+], [
+  [false, false, false],
+  [false, false, true],
+  ,
+  [false, true, true],
+  [false, true, false],
+  ,
+], [
+  ,
+  [true, false, true],
+  [true, false, false],
+  ,
+  [true, true, false],
+  [true, true, true]
+], [
+  [true, false, false],
+  ,
+  [true, false, true],
+  [true, true, true],
+  ,
+  [true, true, false],
+], [
+  [true, false, false],
+  [true, false, true],
+  ,
+  [true, true, true],
+  [true, true, false],
+  ,
+],]
 class Cube {
   front: Face;
   right: Face;
@@ -218,7 +291,15 @@ class Cube {
   back: Face;
   top: Face;
   bottom: Face;
+  frontInternal: Face;
+  rightInternal: Face;
+  leftInternal: Face;
+  backInternal: Face;
+  topInternal: Face;
+  bottomInternal: Face;
   animationSpeed = 1000;
+  frontDir = 0
+  topDir = 1
   constructor(
     canvases: HTMLCanvasElement[],
     splits: HTMLCanvasElement[],
@@ -246,14 +327,131 @@ class Cube {
     this.back = new Face(canvases[3], splits.slice(9, 12), size, Color.O);
     this.top = new Face(canvases[4], splits.slice(12, 15), size, Color.Y);
     this.bottom = new Face(canvases[5], splits.slice(15, 18), size, Color.W);
+    this.frontInternal = this.front
+    this.rightInternal = this.right
+    this.leftInternal = this.left
+    this.backInternal = this.back
+    this.topInternal = this.top
+    this.bottomInternal = this.bottom
+  }
+  rotateAll(axis: 0 | 1 | 2, amount: 1 | 2 | 3) {
+    let vecMap: [number, number, number, number, number, number,] = [0, 0, 0, 0, 0, 0];
+    [() => {
+      const f1 = this.top, f2 = this.right, f3 = this.bottom, f4 = this.left;
+      switch (amount) {
+        case 1:
+          this.right = f1
+          this.bottom = f2
+          this.left = f3
+          this.top = f4
+          f1.rotInternal = (f1.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
+          f2.rotInternal = (f2.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
+          f3.rotInternal = (f3.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
+          f4.rotInternal = (f4.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
+          vecMap = [0, 2, 4, 3, 5, 1]
+          break
+        case 2:
+          this.bottom = f1
+          this.left = f2
+          this.top = f3
+          this.right = f4
+          f1.rotInternal = (f1.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
+          f2.rotInternal = (f2.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
+          f3.rotInternal = (f3.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
+          f4.rotInternal = (f4.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
+          vecMap = [0, 4, 5, 3, 1, 2]
+        case 3:
+          this.left = f1
+          this.top = f2
+          this.right = f3
+          this.bottom = f4
+          f1.rotInternal = (f1.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
+          f2.rotInternal = (f2.rotInternal + 3) % 4 as 0 | 1 | 2 | 3
+          f3.rotInternal = (f3.rotInternal + 3) % 4 as 0 | 1 | 2 | 3
+          f4.rotInternal = (f4.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
+          vecMap = [0, 5, 1, 3, 2, 4]
+      }
+    }, () => {
+      const f1 = this.front, f2 = this.left, f3 = this.back, f4 = this.right;
+      switch (amount) {
+        case 1:
+          this.left = f1
+          this.back = f2
+          this.right = f3
+          this.front = f4
+          vecMap = [5, 1, 0, 2, 4, 3]
+          break
+        case 2:
+          this.back = f1
+          this.right = f2
+          this.front = f3
+          this.left = f4
+          vecMap = [3, 1, 5, 0, 4, 2]
+        case 3:
+          this.right = f1
+          this.front = f2
+          this.left = f3
+          this.back = f4
+          vecMap = [2, 1, 3, 5, 4, 0]
+      }
+    }, () => {
+      const f1 = this.top, f2 = this.back, f3 = this.bottom, f4 = this.front;
+      switch (amount) {
+        case 1:
+          this.back = f1
+          this.bottom = f2
+          this.front = f3
+          this.top = f4
+          f1.rotInternal = (f1.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
+          f2.rotInternal = (f2.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
+          vecMap = [1, 3, 2, 0, 4, 5]
+          break
+        case 2:
+          this.bottom = f1
+          this.front = f2
+          this.top = f3
+          this.back = f4
+          f2.rotInternal = (f2.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
+          f4.rotInternal = (f4.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
+          vecMap = [3, 4, 2, 0, 1, 5]
+        case 3:
+          this.front = f1
+          this.top = f2
+          this.back = f3
+          this.bottom = f4
+          f2.rotInternal = (f2.rotInternal + 3) % 4 as 0 | 1 | 2 | 3
+          f3.rotInternal = (f3.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
+          vecMap = [4, 0, 2, 1, 3, 5]
+      }
+    }][axis]()
+    this.frontDir = vecMap[this.frontDir]
+    this.topDir = vecMap[this.topDir]
   }
   async rotate(axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3) {
     let rotator: Ref<number | undefined> = ref(undefined);
+    const naxis = axisMap[this.frontDir][this.topDir]![axis]
+    const inv = invMap[this.frontDir][this.topDir]![axis]
+    console.log(this.frontDir, this.topDir, axis, naxis, inv)
+    axis = naxis as 0 | 1 | 2
+    if (inv) {
+      start = ~start
+      end = ~end
+      amount = 4 - amount
+    }
     if (start < 0) {
       start = this.size + start;
     }
     if (end < 0) {
       end = this.size + end;
+    }
+    if (start > end) {
+      return
+    }
+    if (end - start > this.size / 2) {
+      this.rotateAll(axis as 0 | 1 | 2, amount)
+      start !== 0 && await this.rotate(axis, 0, start - 1, 4 - amount as 1 | 2 | 3)
+      end !== this.size - 1 && await this.rotate(axis, end + 1, -1, 4 - amount as 1 | 2 | 3)
+      return
     }
     await new Promise<void>((resolve) => {
       const offset0 = ((end + 1) / this.size) * 2 - 1;
@@ -263,34 +461,34 @@ class Cube {
         case 0:
           this.animParams.x0Offset.value = offset0;
           this.animParams.x1Offset.value = offset1;
-          this.front.render(1, 1, 0);
-          this.right.render(offset0, offset1, 0, true);
-          this.left.render(offset0, offset1, 0);
-          this.back.render(1, 1, 0);
-          this.top.render(offset0, offset1, 1);
-          this.bottom.render(offset0, offset1, 1, true);
+          this.frontInternal.render(1, 1, 0);
+          this.rightInternal.render(offset0, offset1, 0, true);
+          this.leftInternal.render(offset0, offset1, 0);
+          this.backInternal.render(1, 1, 0);
+          this.topInternal.render(offset0, offset1, 1);
+          this.bottomInternal.render(offset0, offset1, 1, true);
           rotator = this.animParams.xRot;
           break;
         case 1:
           this.animParams.y0Offset.value = offset0;
           this.animParams.y1Offset.value = offset1;
-          this.front.render(offset1, offset0, 1);
-          this.right.render(offset1, offset0, 1);
-          this.left.render(offset1, offset0, 1);
-          this.back.render(offset1, offset0, 1);
-          this.top.render(1, 1, 0);
-          this.bottom.render(1, 1, 0);
+          this.frontInternal.render(offset1, offset0, 1);
+          this.rightInternal.render(offset1, offset0, 1);
+          this.leftInternal.render(offset1, offset0, 1);
+          this.backInternal.render(offset1, offset0, 1);
+          this.topInternal.render(1, 1, 0);
+          this.bottomInternal.render(1, 1, 0);
           rotator = this.animParams.yRot;
           break;
         case 2:
           this.animParams.z0Offset.value = offset0;
           this.animParams.z1Offset.value = offset1;
-          this.front.render(offset1, offset0, 0, true);
-          this.right.render(1, 1, 0);
-          this.left.render(1, 1, 0);
-          this.back.render(offset1, offset0, 0);
-          this.top.render(offset1, offset0, 0, true);
-          this.bottom.render(offset1, offset0, 0, true);
+          this.frontInternal.render(offset1, offset0, 0, true);
+          this.rightInternal.render(1, 1, 0);
+          this.leftInternal.render(1, 1, 0);
+          this.backInternal.render(offset1, offset0, 0);
+          this.topInternal.render(offset1, offset0, 0, true);
+          this.bottomInternal.render(offset1, offset0, 0, true);
           rotator = this.animParams.zRot;
       }
       let startTime = Date.now();
@@ -315,42 +513,42 @@ class Cube {
     this.animParams.z1Offset.value = 1;
     this.animParams.rotAxis.value = 0
     if (start === 0) {
-      [this.back, this.bottom, this.left][axis].rotate(
+      [this.backInternal, this.bottomInternal, this.leftInternal][axis].rotate(
         (4 - amount) as 1 | 2 | 3,
       );
     }
     if (end === this.size - 1) {
-      [this.front, this.top, this.right][axis].rotate(amount);
+      [this.frontInternal, this.topInternal, this.rightInternal][axis].rotate(amount);
     }
     for (let j = start; j < end + 1; j++) {
       const elements: Color[][] = [
         () => {
           const ret: Color[][] = [[], [], [], []];
           for (let k = 0; k < this.size; k++) {
-            ret[0][k] = this.top.getAt(k, j);
-            ret[1][k] = this.right.getAt(this.size - j - 1, k);
-            ret[2][k] = this.bottom.getAt(this.size - k - 1, this.size - j - 1);
-            ret[3][k] = this.left.getAt(j, this.size - k - 1);
+            ret[0][k] = this.topInternal.getAt(k, j);
+            ret[1][k] = this.rightInternal.getAt(this.size - j - 1, k);
+            ret[2][k] = this.bottomInternal.getAt(this.size - k - 1, this.size - j - 1);
+            ret[3][k] = this.leftInternal.getAt(j, this.size - k - 1);
           }
           return ret;
         },
         () => {
           const ret: Color[][] = [[], [], [], []];
           for (let k = 0; k < this.size; k++) {
-            ret[0][k] = this.front.getAt(k, this.size - j - 1);
-            ret[1][k] = this.left.getAt(k, this.size - j - 1);
-            ret[2][k] = this.back.getAt(k, this.size - j - 1);
-            ret[3][k] = this.right.getAt(k, this.size - j - 1);
+            ret[0][k] = this.frontInternal.getAt(k, this.size - j - 1);
+            ret[1][k] = this.leftInternal.getAt(k, this.size - j - 1);
+            ret[2][k] = this.backInternal.getAt(k, this.size - j - 1);
+            ret[3][k] = this.rightInternal.getAt(k, this.size - j - 1);
           }
           return ret;
         },
         () => {
           const ret: Color[][] = [[], [], [], []];
           for (let k = 0; k < this.size; k++) {
-            ret[0][k] = this.front.getAt(j, k);
-            ret[1][k] = this.top.getAt(j, k);
-            ret[2][k] = this.back.getAt(this.size - j - 1, this.size - k - 1);
-            ret[3][k] = this.bottom.getAt(j, k);
+            ret[0][k] = this.frontInternal.getAt(j, k);
+            ret[1][k] = this.topInternal.getAt(j, k);
+            ret[2][k] = this.backInternal.getAt(this.size - j - 1, this.size - k - 1);
+            ret[3][k] = this.bottomInternal.getAt(j, k);
           }
           return ret;
         },
@@ -361,34 +559,34 @@ class Cube {
       [
         () => {
           for (let k = 0; k < this.size; k++) {
-            this.top.setAt(k, j, elements[0][k]);
-            this.right.setAt(this.size - j - 1, k, elements[1][k]);
-            this.bottom.setAt(
+            this.topInternal.setAt(k, j, elements[0][k]);
+            this.rightInternal.setAt(this.size - j - 1, k, elements[1][k]);
+            this.bottomInternal.setAt(
               this.size - k - 1,
               this.size - j - 1,
               elements[2][k],
             );
-            this.left.setAt(j, this.size - k - 1, elements[3][k]);
+            this.leftInternal.setAt(j, this.size - k - 1, elements[3][k]);
           }
         },
         () => {
           for (let k = 0; k < this.size; k++) {
-            this.front.setAt(k, this.size - j - 1, elements[0][k]);
-            this.left.setAt(k, this.size - j - 1, elements[1][k]);
-            this.back.setAt(k, this.size - j - 1, elements[2][k]);
-            this.right.setAt(k, this.size - j - 1, elements[3][k]);
+            this.frontInternal.setAt(k, this.size - j - 1, elements[0][k]);
+            this.leftInternal.setAt(k, this.size - j - 1, elements[1][k]);
+            this.backInternal.setAt(k, this.size - j - 1, elements[2][k]);
+            this.rightInternal.setAt(k, this.size - j - 1, elements[3][k]);
           }
         },
         () => {
           for (let k = 0; k < this.size; k++) {
-            this.front.setAt(j, k, elements[0][k]);
-            this.top.setAt(j, k, elements[1][k]);
-            this.back.setAt(
+            this.frontInternal.setAt(j, k, elements[0][k]);
+            this.topInternal.setAt(j, k, elements[1][k]);
+            this.backInternal.setAt(
               this.size - j - 1,
               this.size - k - 1,
               elements[2][k],
             );
-            this.bottom.setAt(j, k, elements[3][k]);
+            this.bottomInternal.setAt(j, k, elements[3][k]);
           }
         },
       ][axis]();
@@ -1396,7 +1594,7 @@ const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 const animationSpeed = ref(4)
 onMounted(async () => {
-  const size = 32;
+  const size = 6;
   const cube = new Cube(
     [
       front.value!,
