@@ -848,8 +848,62 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
     }
     return []
   },
-  () => {
-    return []
+  (cube, state) => {
+    if (cube.size < 4) {
+      return []
+    }
+    const c1 = cube.top.getAt(Math.floor((cube.size - 1) / 2), -1)
+    const c2 = cube.front.getAt(Math.floor((cube.size - 1) / 2), 0)
+    if (state.w === Math.floor((cube.size - 3) / 2)) {
+      let isFinished = true
+      loop: for (let i = 1; i < Math.floor((cube.size - 3) / 2) + 1; i++) {
+        const u1 = cube.top.getAt(i, -1)
+        const u2 = cube.front.getAt(i, 0)
+        switch (c1 + c2) {
+          case u1 + u2:
+            continue loop
+          default:
+            isFinished = false
+            break loop
+        }
+      }
+      if (isFinished) {
+        state.f++
+        switch (state.f) {
+          case 1:
+          case 2:
+          case 3:
+          case 5:
+          case 6:
+          case 7:
+            return [[0, -1, -1, 1]]
+          case 4:
+            return [[1, 0, -1, 2]]
+          case 8:
+            return [[1, 0, -1, 1]]
+          case 9:
+          case 10:
+            return [[2, 0, -1, 1]]
+          case 11:
+            return []
+        }
+      } else {
+        state.w = 0
+        state.f = 0
+        return [null]
+      }
+    }
+    const y = state.w + 1
+    const ny = ~y
+    const u1 = cube.top.getAt(y, -1)
+    const u2 = cube.front.getAt(y, 0)
+    if (c1 === u1 && c2 === u2) {
+      state.w++
+      return [null]
+    } else {
+      return [[2, y, y, 2], [0, 0, 0, 2], [1, -1, -1, 2], [2, ny, ny, 3], [1, -1, -1, 2], [2, y, y, 3], [1, -1, -1, 2],
+      [2, y, y, 1], [1, -1, -1, 2], [0, -1, -1, 2], [2, y, y, 1], [0, -1, -1, 2], [2, ny, ny, 1], [0, 0, 0, 2], [2, y, y, 2]]
+    }
   },
   (cube) => {
     let retI: number;
@@ -1177,8 +1231,16 @@ class Solver {
           step && await this.cube.rotate(...step);
         }
       } else {
-        // TODO: パリティ処理
-        startAt++;
+        if (startAt === SolveStep.LAST_CORNER && this.cube.top.getAt(0, 0) !== Color.Y) {
+          const ci = Math.floor((this.cube.size - 2) / 2)
+          for (const h of [...rightStep3, [1, 0, 0, 1], ...rightStep3, [1, 0, 0, 3], ...rightStep3, [0, 0, -1, 2],
+          [2, 1, ci, 2], [0, -1, -1, 2], [1, -1, -1, 2], [2, 1, ci, 2], [1, -1, -1, 2], [0, -1, -1, 2], [2, 1, ci, 2],] as Step[]) {
+            await this.cube.rotate(...h)
+          }
+          startAt = SolveStep.WHITE_EDGE
+        } else {
+          startAt++;
+        }
         state.v = 0;
         state.w = 0
         state.f = 0
@@ -1334,7 +1396,7 @@ const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 const animationSpeed = ref(4)
 onMounted(async () => {
-  const size = 16;
+  const size = 32;
   const cube = new Cube(
     [
       front.value!,
@@ -1392,9 +1454,8 @@ onMounted(async () => {
     const solver = new Solver(cube);
     await solver.solve();
     await new Promise<void>((resolve) => {
-      setTimeout(() => resolve(), 1000)
+      setTimeout(() => resolve(), 3000)
     })
-    break
   }
 });
 </script>
