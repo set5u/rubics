@@ -1,5 +1,5 @@
 <template lang="pug">
-.h-full(@scroll.prevent)
+.h-full
   .hidden
     canvas(ref="top")
     canvas(ref="bottom")
@@ -8,7 +8,7 @@
     canvas(ref="back")
     canvas(ref="left")
   .h-full.flex.justify-center.items-center.scene.overflow-hidden
-    .cube
+    .cube(@mousedown.capture="lock" @mouseup="unlock")
       .bg-gray-400.border-2.border-black.face.splitter.x0(v-show="xShow")
       .bg-gray-400.border-2.border-black.face.splitter.x1(v-show="xShow")
       .bg-gray-400.border-2.border-black.face.splitter.y0(v-show="yShow")
@@ -63,8 +63,16 @@
     input(v-model="rotX" type="range" min="-90" max="90")
 </template>
 <script setup lang="ts">
+const { lock, unlock, element } = usePointerLock()
+const { x, y } = useMouse({ type: 'movement' })
 const rotY = ref(-45);
 const rotX = ref(-45);
+watch([x, y], ([x, y]) => {
+  if (!element.value)
+    return
+  rotY.value += x / 2
+  rotX.value -= y / 2
+})
 enum Color {
   R = "R",
   G = "G",
@@ -395,6 +403,7 @@ class Cube {
 enum SolveStep {
   BIG_WHITE_UP,
   FACE,
+  BIG_EDGE,
   // WHITE_UP,
   // FLOWER,
   // FLOWER_DOWN,
@@ -674,6 +683,21 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
       case cube.left.getAt(~y, x):
         return [[1, 0, -2, 3]]
     }
+    return []
+  },
+  (cube, state) => {
+    // w:その中で何番目か
+    // f:何番目の辺か
+    if (state.f === 12) {
+      return []
+    }
+    if (state.w === cube.size - 2) {
+      // 次の辺を探索　-> 揃っていたらf++,見つかったらwを0にする。
+    }
+    // w番目の辺を揃える
+    // 1. 揃ってたらw++
+    // 2. 位置にあったら動作
+    // 3. 探して位置に持っていく
     return []
   },
   (cube) => {
@@ -1156,7 +1180,7 @@ const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 const animationSpeed = ref(4)
 onMounted(async () => {
-  const size = 64;
+  const size = 5;
   const cube = new Cube(
     [
       front.value!,
