@@ -118,7 +118,7 @@ class Face {
     if (y < 0) {
       y = this.size + y;
     }
-    switch ((this.rot + 4 - this.rotInternal) % 4 as 0 | 1 | 2 | 3) {
+    switch ((this.rot + this.rotInternal) % 4 as 0 | 1 | 2 | 3) {
       case 0:
         return x + this.size * y;
       case 1:
@@ -134,6 +134,34 @@ class Face {
   }
   setAt(x: number, y: number, v: Color) {
     const i = this.getIndexAt(x, y);
+    this.data[i] = v;
+    const pixelSize = this.canvas.width / this.size;
+    this.ctx.fillStyle = i2color[v];
+    this.ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+  }
+  getIndexAtInternal(x: number, y: number) {
+    if (x < 0) {
+      x = this.size + x;
+    }
+    if (y < 0) {
+      y = this.size + y;
+    }
+    switch (this.rot) {
+      case 0:
+        return x + this.size * y;
+      case 1:
+        return y + this.size * (this.size - x - 1);
+      case 2:
+        return this.size - x - 1 + this.size * (this.size - y - 1);
+      case 3:
+        return this.size - y - 1 + this.size * x;
+    }
+  }
+  getAtInternal(x: number, y: number) {
+    return this.data[this.getIndexAtInternal(x, y)];
+  }
+  setAtInternal(x: number, y: number, v: Color) {
+    const i = this.getIndexAtInternal(x, y);
     this.data[i] = v;
     const pixelSize = this.canvas.width / this.size;
     this.ctx.fillStyle = i2color[v];
@@ -333,11 +361,21 @@ class Cube {
     this.backInternal = this.back
     this.topInternal = this.top
     this.bottomInternal = this.bottom
+    this.front.n = "front"
+    this.right.n = "right"
+    this.left.n = "left"
+    this.back.n = "back"
+    this.top.n = "top"
+    this.bottom.n = "bottom"
+    console.log(this)
   }
   rotateAll(axis: 0 | 1 | 2, amount: 1 | 2 | 3) {
+    console.log(axis, amount)
     let vecMap: [number, number, number, number, number, number,] = [0, 0, 0, 0, 0, 0];
     [() => {
       const f1 = this.top, f2 = this.right, f3 = this.bottom, f4 = this.left;
+      this.front.rotInternal = (this.front.rotInternal + amount) % 4 as 0 | 1 | 2 | 3
+      this.back.rotInternal = (this.back.rotInternal + 4 - amount) % 4 as 0 | 1 | 2 | 3
       switch (amount) {
         case 1:
           this.right = f1
@@ -360,6 +398,7 @@ class Cube {
           f3.rotInternal = (f3.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
           f4.rotInternal = (f4.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
           vecMap = [0, 4, 5, 3, 1, 2]
+          break
         case 3:
           this.left = f1
           this.top = f2
@@ -373,6 +412,8 @@ class Cube {
       }
     }, () => {
       const f1 = this.front, f2 = this.left, f3 = this.back, f4 = this.right;
+      this.top.rotInternal = (this.top.rotInternal + amount) % 4 as 0 | 1 | 2 | 3
+      this.bottom.rotInternal = (this.bottom.rotInternal + 4 - amount) % 4 as 0 | 1 | 2 | 3
       switch (amount) {
         case 1:
           this.left = f1
@@ -387,6 +428,7 @@ class Cube {
           this.front = f3
           this.left = f4
           vecMap = [3, 1, 5, 0, 4, 2]
+          break
         case 3:
           this.right = f1
           this.front = f2
@@ -396,6 +438,8 @@ class Cube {
       }
     }, () => {
       const f1 = this.top, f2 = this.back, f3 = this.bottom, f4 = this.front;
+      this.right.rotInternal = (this.right.rotInternal + amount) % 4 as 0 | 1 | 2 | 3
+      this.left.rotInternal = (this.left.rotInternal + 4 - amount) % 4 as 0 | 1 | 2 | 3
       switch (amount) {
         case 1:
           this.back = f1
@@ -414,16 +458,17 @@ class Cube {
           f2.rotInternal = (f2.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
           f4.rotInternal = (f4.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
           vecMap = [3, 4, 2, 0, 1, 5]
+          break
         case 3:
           this.front = f1
           this.top = f2
           this.back = f3
           this.bottom = f4
-          f2.rotInternal = (f2.rotInternal + 3) % 4 as 0 | 1 | 2 | 3
+          f2.rotInternal = (f2.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
           f3.rotInternal = (f3.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
-          vecMap = [4, 0, 2, 1, 3, 5]
+          vecMap = [0, 4, 2, 1, 3, 5]
       }
-    }][axis]()
+    }][axis]();
     this.frontDir = vecMap[this.frontDir]
     this.topDir = vecMap[this.topDir]
   }
@@ -431,7 +476,6 @@ class Cube {
     let rotator: Ref<number | undefined> = ref(undefined);
     const naxis = axisMap[this.frontDir][this.topDir]![axis]
     const inv = invMap[this.frontDir][this.topDir]![axis]
-    console.log(this.frontDir, this.topDir, axis, naxis, inv)
     axis = naxis as 0 | 1 | 2
     if (inv) {
       start = ~start
@@ -525,30 +569,30 @@ class Cube {
         () => {
           const ret: Color[][] = [[], [], [], []];
           for (let k = 0; k < this.size; k++) {
-            ret[0][k] = this.topInternal.getAt(k, j);
-            ret[1][k] = this.rightInternal.getAt(this.size - j - 1, k);
-            ret[2][k] = this.bottomInternal.getAt(this.size - k - 1, this.size - j - 1);
-            ret[3][k] = this.leftInternal.getAt(j, this.size - k - 1);
+            ret[0][k] = this.topInternal.getAtInternal(k, j);
+            ret[1][k] = this.rightInternal.getAtInternal(this.size - j - 1, k);
+            ret[2][k] = this.bottomInternal.getAtInternal(this.size - k - 1, this.size - j - 1);
+            ret[3][k] = this.leftInternal.getAtInternal(j, this.size - k - 1);
           }
           return ret;
         },
         () => {
           const ret: Color[][] = [[], [], [], []];
           for (let k = 0; k < this.size; k++) {
-            ret[0][k] = this.frontInternal.getAt(k, this.size - j - 1);
-            ret[1][k] = this.leftInternal.getAt(k, this.size - j - 1);
-            ret[2][k] = this.backInternal.getAt(k, this.size - j - 1);
-            ret[3][k] = this.rightInternal.getAt(k, this.size - j - 1);
+            ret[0][k] = this.frontInternal.getAtInternal(k, this.size - j - 1);
+            ret[1][k] = this.leftInternal.getAtInternal(k, this.size - j - 1);
+            ret[2][k] = this.backInternal.getAtInternal(k, this.size - j - 1);
+            ret[3][k] = this.rightInternal.getAtInternal(k, this.size - j - 1);
           }
           return ret;
         },
         () => {
           const ret: Color[][] = [[], [], [], []];
           for (let k = 0; k < this.size; k++) {
-            ret[0][k] = this.frontInternal.getAt(j, k);
-            ret[1][k] = this.topInternal.getAt(j, k);
-            ret[2][k] = this.backInternal.getAt(this.size - j - 1, this.size - k - 1);
-            ret[3][k] = this.bottomInternal.getAt(j, k);
+            ret[0][k] = this.frontInternal.getAtInternal(j, k);
+            ret[1][k] = this.topInternal.getAtInternal(j, k);
+            ret[2][k] = this.backInternal.getAtInternal(this.size - j - 1, this.size - k - 1);
+            ret[3][k] = this.bottomInternal.getAtInternal(j, k);
           }
           return ret;
         },
@@ -559,34 +603,34 @@ class Cube {
       [
         () => {
           for (let k = 0; k < this.size; k++) {
-            this.topInternal.setAt(k, j, elements[0][k]);
-            this.rightInternal.setAt(this.size - j - 1, k, elements[1][k]);
-            this.bottomInternal.setAt(
+            this.topInternal.setAtInternal(k, j, elements[0][k]);
+            this.rightInternal.setAtInternal(this.size - j - 1, k, elements[1][k]);
+            this.bottomInternal.setAtInternal(
               this.size - k - 1,
               this.size - j - 1,
               elements[2][k],
             );
-            this.leftInternal.setAt(j, this.size - k - 1, elements[3][k]);
+            this.leftInternal.setAtInternal(j, this.size - k - 1, elements[3][k]);
           }
         },
         () => {
           for (let k = 0; k < this.size; k++) {
-            this.frontInternal.setAt(k, this.size - j - 1, elements[0][k]);
-            this.leftInternal.setAt(k, this.size - j - 1, elements[1][k]);
-            this.backInternal.setAt(k, this.size - j - 1, elements[2][k]);
-            this.rightInternal.setAt(k, this.size - j - 1, elements[3][k]);
+            this.frontInternal.setAtInternal(k, this.size - j - 1, elements[0][k]);
+            this.leftInternal.setAtInternal(k, this.size - j - 1, elements[1][k]);
+            this.backInternal.setAtInternal(k, this.size - j - 1, elements[2][k]);
+            this.rightInternal.setAtInternal(k, this.size - j - 1, elements[3][k]);
           }
         },
         () => {
           for (let k = 0; k < this.size; k++) {
-            this.frontInternal.setAt(j, k, elements[0][k]);
-            this.topInternal.setAt(j, k, elements[1][k]);
-            this.backInternal.setAt(
+            this.frontInternal.setAtInternal(j, k, elements[0][k]);
+            this.topInternal.setAtInternal(j, k, elements[1][k]);
+            this.backInternal.setAtInternal(
               this.size - j - 1,
               this.size - k - 1,
               elements[2][k],
             );
-            this.bottomInternal.setAt(j, k, elements[3][k]);
+            this.bottomInternal.setAtInternal(j, k, elements[3][k]);
           }
         },
       ][axis]();
@@ -1649,11 +1693,15 @@ onMounted(async () => {
       const amount = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
       await cube.rotate(axis, start, end, amount);
     }
+    // while (true) {
+    //   await cube.rotate(0, 1, 1, 1)
+    // }
     const solver = new Solver(cube);
     await solver.solve();
     await new Promise<void>((resolve) => {
       setTimeout(() => resolve(), 3000)
     })
+    break
   }
 });
 </script>
