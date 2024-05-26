@@ -441,8 +441,10 @@ class Cube {
     console.log(axis, naxis, inv, this.frontDir, this.topDir);
     axis = naxis as 0 | 1 | 2;
     if (inv) {
-      start = ~start;
-      end = ~end;
+      const os = start
+      const oe = end
+      start = ~oe;
+      end = ~os;
       amount = 4 - amount;
     }
     if (start < 0) {
@@ -852,6 +854,7 @@ const solveStepFuncs: ((
       const c2 = cube.top.getAt(nc, nc) === w ? "T" : "F";
       const c3 = cube.top.getAt(c, nc) === w ? "T" : "F";
       console.log(cube.top.n, c, nc, cube.top.getAt(c, c), cube.top.getAt(nc, c), cube.top.getAt(nc, nc), cube.top.getAt(c, nc))
+      console.log(cube.front.n, c, nc, cube.front.getAt(c, c), cube.front.getAt(nc, c), cube.front.getAt(nc, nc), cube.front.getAt(c, nc))
       if (state.w < 4) {
         switch (c0 + c1 + c2 + c3) {
           case "TTTT":
