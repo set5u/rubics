@@ -8,7 +8,7 @@
     canvas(ref="back")
     canvas(ref="left")
   .h-full.flex.justify-center.items-center.scene.overflow-hidden
-    .cube(@mousedown.capture="lock" @mouseup="unlock")
+    .cube(@mousedown.capture="lock", @mouseup="unlock")
       .bg-gray-400.border-2.border-black.face.splitter.x0(v-show="xShow")
       .bg-gray-400.border-2.border-black.face.splitter.x1(v-show="xShow")
       .bg-gray-400.border-2.border-black.face.splitter.y0(v-show="yShow")
@@ -57,22 +57,21 @@
         canvas.split.left0(ref="leftSplit0")
         canvas.split.middle.left1(ref="leftSplit1")
         canvas.split.left2(ref="leftSplit2")
-  input.fixed.top-0(v-model="animationSpeed" type="range" min="0" max="10")
-  div.fixed.top-0.right-0
-    input(v-model="rotY" type="range" min="-180" max="180")
-    input(v-model="rotX" type="range" min="-90" max="90")
+  input.fixed.top-0(v-model="animationSpeed", type="range", min="0", max="10")
+  .fixed.top-0.right-0
+    input(v-model="rotY", type="range", min="-180", max="180")
+    input(v-model="rotX", type="range", min="-90", max="90")
 </template>
 <script setup lang="ts">
-const { lock, unlock, element } = usePointerLock()
-const { x, y } = useMouse({ type: 'movement' })
+const { lock, unlock, element } = usePointerLock();
+const { x, y } = useMouse({ type: "movement" });
 const rotY = ref(-45);
 const rotX = ref(-45);
 watch([x, y], ([x, y]) => {
-  if (!element.value)
-    return
-  rotY.value += x / 2
-  rotX.value -= y / 2
-})
+  if (!element.value) return;
+  rotY.value += x / 2;
+  rotX.value -= y / 2;
+});
 enum Color {
   R = "R",
   G = "G",
@@ -96,7 +95,7 @@ class Face {
   ocanvas: HTMLCanvasElement;
   octx: CanvasRenderingContext2D;
   rot: 0 | 1 | 2 | 3 = 0;
-  rotInternal: 0 | 1 | 2 | 3 = 0
+  rotInternal: 0 | 1 | 2 | 3 = 0;
   constructor(
     public canvas: HTMLCanvasElement,
     public splits: HTMLCanvasElement[],
@@ -118,7 +117,7 @@ class Face {
     if (y < 0) {
       y = this.size + y;
     }
-    switch ((this.rot + this.rotInternal) % 4 as 0 | 1 | 2 | 3) {
+    switch (((this.rot + this.rotInternal) % 4) as 0 | 1 | 2 | 3) {
       case 0:
         return x + this.size * y;
       case 1:
@@ -226,92 +225,25 @@ class Face {
     }
   }
 }
-const axisMap: ([0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2] | undefined)[][] = [[
-  ,
-  [0, 1, 2],
-  [0, 2, 1],
-  ,
-  [0, 1, 2],
-  [0, 2, 1]
-], [
-  [1, 0, 2],
-  ,
-  [1, 2, 0],
-  [1, 0, 2],
-  ,
-  [1, 2, 0]
-], [
-  [2, 0, 1],
-  [2, 1, 0],
-  ,
-  [2, 0, 1],
-  [2, 1, 0],
-  ,
-], [
-  ,
-  [0, 1, 2],
-  [0, 2, 1],
-  ,
-  [0, 1, 2],
-  [0, 2, 1],
-], [
-  [1, 0, 2],
-  ,
-  [1, 2, 0],
-  [1, 0, 2],
-  ,
-  [1, 2, 0]
-], [
-  [2, 0, 1],
-  [2, 1, 0],
-  ,
-  [2, 0, 1],
-  [2, 1, 0],
-  ,
-],]
-const invMap: ([boolean, boolean, boolean] | undefined)[][] = [[
-  ,
-  [false, false, false],
-  [false, false, true],
-  ,
-  [false, true, true],
-  [false, true, false]
-], [
-  [false, false, true],
-  ,
-  [false, false, false],
-  [false, true, false],
-  ,
-  [false, true, true]
-], [
-  [false, false, false],
-  [false, false, true],
-  ,
-  [false, true, true],
-  [false, true, false],
-  ,
-], [
-  ,
-  [true, false, true],
-  [true, false, false],
-  ,
-  [true, true, false],
-  [true, true, true]
-], [
-  [true, false, false],
-  ,
-  [true, false, true],
-  [true, true, true],
-  ,
-  [true, true, false],
-], [
-  [true, false, false],
-  [true, false, true],
-  ,
-  [true, true, true],
-  [true, true, false],
-  ,
-],]
+const axisMap: ([0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2] | undefined)[][] = [
+  [, [0, 1, 2], [0, 2, 1], , [0, 1, 2], [0, 2, 1]],
+  [[1, 0, 2], , [1, 2, 0], [1, 0, 2], , [1, 2, 0]],
+  [[2, 0, 1], [2, 1, 0], , [2, 0, 1], [2, 1, 0], ,],
+  [, [0, 1, 2], [0, 2, 1], , [0, 1, 2], [0, 2, 1]],
+  [[1, 0, 2], , [1, 2, 0], [1, 0, 2], , [1, 2, 0]],
+  [[2, 0, 1], [2, 1, 0], , [2, 0, 1], [2, 1, 0], ,],
+];
+const invMap: ([boolean, boolean, boolean] | undefined)[][] = [
+  [
+    ,
+    // TODO:
+    [],
+    [],
+    ,
+    [],
+    [],
+  ],
+];
 class Cube {
   front: Face;
   right: Face;
@@ -326,8 +258,8 @@ class Cube {
   topInternal: Face;
   bottomInternal: Face;
   animationSpeed = 1000;
-  frontDir = 0
-  topDir = 1
+  frontDir = 0;
+  topDir = 1;
   constructor(
     canvases: HTMLCanvasElement[],
     splits: HTMLCanvasElement[],
@@ -355,132 +287,168 @@ class Cube {
     this.back = new Face(canvases[3], splits.slice(9, 12), size, Color.O);
     this.top = new Face(canvases[4], splits.slice(12, 15), size, Color.Y);
     this.bottom = new Face(canvases[5], splits.slice(15, 18), size, Color.W);
-    this.frontInternal = this.front
-    this.rightInternal = this.right
-    this.leftInternal = this.left
-    this.backInternal = this.back
-    this.topInternal = this.top
-    this.bottomInternal = this.bottom
-    this.front.n = "front"
-    this.right.n = "right"
-    this.left.n = "left"
-    this.back.n = "back"
-    this.top.n = "top"
-    this.bottom.n = "bottom"
-    console.log(this)
+    this.frontInternal = this.front;
+    this.rightInternal = this.right;
+    this.leftInternal = this.left;
+    this.backInternal = this.back;
+    this.topInternal = this.top;
+    this.bottomInternal = this.bottom;
+    this.front.n = "front";
+    this.right.n = "right";
+    this.left.n = "left";
+    this.back.n = "back";
+    this.top.n = "top";
+    this.bottom.n = "bottom";
+    console.log(this);
   }
   rotateAll(axis: 0 | 1 | 2, amount: 1 | 2 | 3) {
-    console.log(axis, amount)
-    let vecMap: [number, number, number, number, number, number,] = [0, 0, 0, 0, 0, 0];
-    [() => {
-      const f1 = this.top, f2 = this.right, f3 = this.bottom, f4 = this.left;
-      this.front.rotInternal = (this.front.rotInternal + amount) % 4 as 0 | 1 | 2 | 3
-      this.back.rotInternal = (this.back.rotInternal + 4 - amount) % 4 as 0 | 1 | 2 | 3
-      switch (amount) {
-        case 1:
-          this.right = f1
-          this.bottom = f2
-          this.left = f3
-          this.top = f4
-          f1.rotInternal = (f1.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
-          f2.rotInternal = (f2.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
-          f3.rotInternal = (f3.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
-          f4.rotInternal = (f4.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
-          vecMap = [0, 2, 4, 3, 5, 1]
-          break
-        case 2:
-          this.bottom = f1
-          this.left = f2
-          this.top = f3
-          this.right = f4
-          f1.rotInternal = (f1.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
-          f2.rotInternal = (f2.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
-          f3.rotInternal = (f3.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
-          f4.rotInternal = (f4.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
-          vecMap = [0, 4, 5, 3, 1, 2]
-          break
-        case 3:
-          this.left = f1
-          this.top = f2
-          this.right = f3
-          this.bottom = f4
-          f1.rotInternal = (f1.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
-          f2.rotInternal = (f2.rotInternal + 3) % 4 as 0 | 1 | 2 | 3
-          f3.rotInternal = (f3.rotInternal + 3) % 4 as 0 | 1 | 2 | 3
-          f4.rotInternal = (f4.rotInternal + 1) % 4 as 0 | 1 | 2 | 3
-          vecMap = [0, 5, 1, 3, 2, 4]
-      }
-    }, () => {
-      const f1 = this.front, f2 = this.left, f3 = this.back, f4 = this.right;
-      this.top.rotInternal = (this.top.rotInternal + amount) % 4 as 0 | 1 | 2 | 3
-      this.bottom.rotInternal = (this.bottom.rotInternal + 4 - amount) % 4 as 0 | 1 | 2 | 3
-      switch (amount) {
-        case 1:
-          this.left = f1
-          this.back = f2
-          this.right = f3
-          this.front = f4
-          vecMap = [5, 1, 0, 2, 4, 3]
-          break
-        case 2:
-          this.back = f1
-          this.right = f2
-          this.front = f3
-          this.left = f4
-          vecMap = [3, 1, 5, 0, 4, 2]
-          break
-        case 3:
-          this.right = f1
-          this.front = f2
-          this.left = f3
-          this.back = f4
-          vecMap = [2, 1, 3, 5, 4, 0]
-      }
-    }, () => {
-      const f1 = this.top, f2 = this.back, f3 = this.bottom, f4 = this.front;
-      this.right.rotInternal = (this.right.rotInternal + amount) % 4 as 0 | 1 | 2 | 3
-      this.left.rotInternal = (this.left.rotInternal + 4 - amount) % 4 as 0 | 1 | 2 | 3
-      switch (amount) {
-        case 1:
-          this.back = f1
-          this.bottom = f2
-          this.front = f3
-          this.top = f4
-          f1.rotInternal = (f1.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
-          f2.rotInternal = (f2.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
-          vecMap = [1, 3, 2, 0, 4, 5]
-          break
-        case 2:
-          this.bottom = f1
-          this.front = f2
-          this.top = f3
-          this.back = f4
-          f2.rotInternal = (f2.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
-          f4.rotInternal = (f4.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
-          vecMap = [3, 4, 2, 0, 1, 5]
-          break
-        case 3:
-          this.front = f1
-          this.top = f2
-          this.back = f3
-          this.bottom = f4
-          f2.rotInternal = (f2.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
-          f3.rotInternal = (f3.rotInternal + 2) % 4 as 0 | 1 | 2 | 3
-          vecMap = [0, 4, 2, 1, 3, 5]
-      }
-    }][axis]();
-    this.frontDir = vecMap[this.frontDir]
-    this.topDir = vecMap[this.topDir]
+    let vecMap: [number, number, number, number, number, number] = [
+      0, 0, 0, 0, 0, 0,
+    ];
+    [
+      () => {
+        const f1 = this.top,
+          f2 = this.right,
+          f3 = this.bottom,
+          f4 = this.left;
+        this.front.rotInternal = ((this.front.rotInternal + amount) % 4) as
+          | 0
+          | 1
+          | 2
+          | 3;
+        this.back.rotInternal = ((this.back.rotInternal + 4 - amount) % 4) as
+          | 0
+          | 1
+          | 2
+          | 3;
+        switch (amount) {
+          case 1:
+            this.right = f1;
+            this.bottom = f2;
+            this.left = f3;
+            this.top = f4;
+            f1.rotInternal = ((f1.rotInternal + 1) % 4) as 0 | 1 | 2 | 3;
+            f2.rotInternal = ((f2.rotInternal + 1) % 4) as 0 | 1 | 2 | 3;
+            f3.rotInternal = ((f3.rotInternal + 1) % 4) as 0 | 1 | 2 | 3;
+            f4.rotInternal = ((f4.rotInternal + 1) % 4) as 0 | 1 | 2 | 3;
+            vecMap = [0, 5, 1, 3, 2, 4];
+            break;
+          case 2:
+            this.bottom = f1;
+            this.left = f2;
+            this.top = f3;
+            this.right = f4;
+            f2.rotInternal = ((f2.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
+            f4.rotInternal = ((f4.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
+            vecMap = [0, 4, 5, 3, 1, 2];
+            break;
+          case 3:
+            this.left = f1;
+            this.top = f2;
+            this.right = f3;
+            this.bottom = f4;
+            f1.rotInternal = ((f1.rotInternal + 3) % 4) as 0 | 1 | 2 | 3;
+            f2.rotInternal = ((f2.rotInternal + 3) % 4) as 0 | 1 | 2 | 3;
+            f3.rotInternal = ((f3.rotInternal + 3) % 4) as 0 | 1 | 2 | 3;
+            f4.rotInternal = ((f4.rotInternal + 3) % 4) as 0 | 1 | 2 | 3;
+            vecMap = [0, 2, 4, 3, 5, 1];
+        }
+      },
+      () => {
+        const f1 = this.front,
+          f2 = this.left,
+          f3 = this.back,
+          f4 = this.right;
+        this.top.rotInternal = ((this.top.rotInternal + amount) % 4) as
+          | 0
+          | 1
+          | 2
+          | 3;
+        this.bottom.rotInternal = ((this.bottom.rotInternal + 4 - amount) %
+          4) as 0 | 1 | 2 | 3;
+        switch (amount) {
+          case 1:
+            this.left = f1;
+            this.back = f2;
+            this.right = f3;
+            this.front = f4;
+            vecMap = [2, 1, 3, 5, 4, 0];
+            break;
+          case 2:
+            this.back = f1;
+            this.right = f2;
+            this.front = f3;
+            this.left = f4;
+            vecMap = [3, 1, 5, 0, 4, 2];
+            break;
+          case 3:
+            this.right = f1;
+            this.front = f2;
+            this.left = f3;
+            this.back = f4;
+            vecMap = [5, 1, 0, 2, 4, 3];
+        }
+      },
+      () => {
+        const f1 = this.top,
+          f2 = this.back,
+          f3 = this.bottom,
+          f4 = this.front;
+        this.right.rotInternal = ((this.right.rotInternal + amount) % 4) as
+          | 0
+          | 1
+          | 2
+          | 3;
+        this.left.rotInternal = ((this.left.rotInternal + 4 - amount) % 4) as
+          | 0
+          | 1
+          | 2
+          | 3;
+        switch (amount) {
+          case 1:
+            this.back = f1;
+            this.bottom = f2;
+            this.front = f3;
+            this.top = f4;
+            f1.rotInternal = ((f1.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
+            f2.rotInternal = ((f2.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
+            vecMap = [4, 0, 2, 1, 3, 5];
+            break;
+          case 2:
+            this.bottom = f1;
+            this.front = f2;
+            this.top = f3;
+            this.back = f4;
+            f1.rotInternal = ((f1.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
+            f2.rotInternal = ((f2.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
+            f3.rotInternal = ((f3.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
+            f4.rotInternal = ((f4.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
+            vecMap = [3, 4, 2, 0, 1, 5];
+            break;
+          case 3:
+            this.front = f1;
+            this.top = f2;
+            this.back = f3;
+            this.bottom = f4;
+            f2.rotInternal = ((f2.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
+            f3.rotInternal = ((f3.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
+            vecMap = [1, 3, 2, 4, 0, 5];
+        }
+      },
+    ][axis]();
+    this.frontDir = vecMap[this.frontDir];
+    this.topDir = vecMap[this.topDir];
   }
   async rotate(axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3) {
     let rotator: Ref<number | undefined> = ref(undefined);
-    const naxis = axisMap[this.frontDir][this.topDir]![axis]
-    const inv = invMap[this.frontDir][this.topDir]![axis]
-    axis = naxis as 0 | 1 | 2
+    const naxis = axisMap[this.frontDir][this.topDir]![axis];
+    const inv = invMap[this.frontDir][this.topDir]![axis];
+    console.log(axis, naxis, inv, this.frontDir, this.topDir);
+    axis = naxis as 0 | 1 | 2;
     if (inv) {
-      start = ~start
-      end = ~end
-      amount = 4 - amount
+      start = ~start;
+      end = ~end;
+      amount = 4 - amount;
     }
     if (start < 0) {
       start = this.size + start;
@@ -489,13 +457,15 @@ class Cube {
       end = this.size + end;
     }
     if (start > end) {
-      return
+      return;
     }
     if (end - start > this.size / 2) {
-      this.rotateAll(axis as 0 | 1 | 2, amount)
-      start !== 0 && await this.rotate(axis, 0, start - 1, 4 - amount as 1 | 2 | 3)
-      end !== this.size - 1 && await this.rotate(axis, end + 1, -1, 4 - amount as 1 | 2 | 3)
-      return
+      this.rotateAll(axis as 0 | 1 | 2, amount);
+      start !== 0 &&
+        (await this.rotate(axis, 0, start - 1, (4 - amount) as 1 | 2 | 3));
+      end !== this.size - 1 &&
+        (await this.rotate(axis, end + 1, -1, (4 - amount) as 1 | 2 | 3));
+      return;
     }
     await new Promise<void>((resolve) => {
       const offset0 = ((end + 1) / this.size) * 2 - 1;
@@ -555,14 +525,16 @@ class Cube {
     this.animParams.y1Offset.value = 1;
     this.animParams.z0Offset.value = 1;
     this.animParams.z1Offset.value = 1;
-    this.animParams.rotAxis.value = 0
+    this.animParams.rotAxis.value = 0;
     if (start === 0) {
       [this.backInternal, this.bottomInternal, this.leftInternal][axis].rotate(
         (4 - amount) as 1 | 2 | 3,
       );
     }
     if (end === this.size - 1) {
-      [this.frontInternal, this.topInternal, this.rightInternal][axis].rotate(amount);
+      [this.frontInternal, this.topInternal, this.rightInternal][axis].rotate(
+        amount,
+      );
     }
     for (let j = start; j < end + 1; j++) {
       const elements: Color[][] = [
@@ -571,7 +543,10 @@ class Cube {
           for (let k = 0; k < this.size; k++) {
             ret[0][k] = this.topInternal.getAtInternal(k, j);
             ret[1][k] = this.rightInternal.getAtInternal(this.size - j - 1, k);
-            ret[2][k] = this.bottomInternal.getAtInternal(this.size - k - 1, this.size - j - 1);
+            ret[2][k] = this.bottomInternal.getAtInternal(
+              this.size - k - 1,
+              this.size - j - 1,
+            );
             ret[3][k] = this.leftInternal.getAtInternal(j, this.size - k - 1);
           }
           return ret;
@@ -591,7 +566,10 @@ class Cube {
           for (let k = 0; k < this.size; k++) {
             ret[0][k] = this.frontInternal.getAtInternal(j, k);
             ret[1][k] = this.topInternal.getAtInternal(j, k);
-            ret[2][k] = this.backInternal.getAtInternal(this.size - j - 1, this.size - k - 1);
+            ret[2][k] = this.backInternal.getAtInternal(
+              this.size - j - 1,
+              this.size - k - 1,
+            );
             ret[3][k] = this.bottomInternal.getAtInternal(j, k);
           }
           return ret;
@@ -604,21 +582,45 @@ class Cube {
         () => {
           for (let k = 0; k < this.size; k++) {
             this.topInternal.setAtInternal(k, j, elements[0][k]);
-            this.rightInternal.setAtInternal(this.size - j - 1, k, elements[1][k]);
+            this.rightInternal.setAtInternal(
+              this.size - j - 1,
+              k,
+              elements[1][k],
+            );
             this.bottomInternal.setAtInternal(
               this.size - k - 1,
               this.size - j - 1,
               elements[2][k],
             );
-            this.leftInternal.setAtInternal(j, this.size - k - 1, elements[3][k]);
+            this.leftInternal.setAtInternal(
+              j,
+              this.size - k - 1,
+              elements[3][k],
+            );
           }
         },
         () => {
           for (let k = 0; k < this.size; k++) {
-            this.frontInternal.setAtInternal(k, this.size - j - 1, elements[0][k]);
-            this.leftInternal.setAtInternal(k, this.size - j - 1, elements[1][k]);
-            this.backInternal.setAtInternal(k, this.size - j - 1, elements[2][k]);
-            this.rightInternal.setAtInternal(k, this.size - j - 1, elements[3][k]);
+            this.frontInternal.setAtInternal(
+              k,
+              this.size - j - 1,
+              elements[0][k],
+            );
+            this.leftInternal.setAtInternal(
+              k,
+              this.size - j - 1,
+              elements[1][k],
+            );
+            this.backInternal.setAtInternal(
+              k,
+              this.size - j - 1,
+              elements[2][k],
+            );
+            this.rightInternal.setAtInternal(
+              k,
+              this.size - j - 1,
+              elements[3][k],
+            );
           }
         },
         () => {
@@ -726,19 +728,46 @@ const flower: Step[][] = [
     [0, 0, 0, 2],
   ],
 ];
-const rightStep: Step[] = [[1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 3], [2, -1, -1, 3],]
-const leftStep: Step[] = [[1, -1, -1, 3], [2, 0, 0, 1], [1, -1, -1, 1], [2, 0, 0, 3],]
-const insertRightEdge: Step[] = [...rightStep, [1, 0, -1, 1], ...leftStep]
-const insertLeftEdge: Step[] = [...leftStep, [1, 0, -1, 3], ...rightStep]
-const whiteX: Step[] = [[0, -1, -1, 1], ...rightStep, [0, -1, -1, 3]]
-const whiteX2: Step[] = [[0, -1, -1, 1], ...rightStep, ...rightStep, [0, -1, -1, 3]]
-const whiteEdge: Step[] = [[1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 2], [2, -1, -1, 3], [1, -1, -1, 3], [2, -1, -1, 1], [1, -1, -1, 3], [2, -1, -1, 3]]
-const rightStep3: Step[] = [...rightStep, ...rightStep, ...rightStep]
-const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) => (Step | null)[])[] = [
+const rightStep: Step[] = [
+  [1, -1, -1, 1],
+  [2, -1, -1, 1],
+  [1, -1, -1, 3],
+  [2, -1, -1, 3],
+];
+const leftStep: Step[] = [
+  [1, -1, -1, 3],
+  [2, 0, 0, 1],
+  [1, -1, -1, 1],
+  [2, 0, 0, 3],
+];
+const insertRightEdge: Step[] = [...rightStep, [1, 0, -1, 1], ...leftStep];
+const insertLeftEdge: Step[] = [...leftStep, [1, 0, -1, 3], ...rightStep];
+const whiteX: Step[] = [[0, -1, -1, 1], ...rightStep, [0, -1, -1, 3]];
+const whiteX2: Step[] = [
+  [0, -1, -1, 1],
+  ...rightStep,
+  ...rightStep,
+  [0, -1, -1, 3],
+];
+const whiteEdge: Step[] = [
+  [1, -1, -1, 1],
+  [2, -1, -1, 1],
+  [1, -1, -1, 2],
+  [2, -1, -1, 3],
+  [1, -1, -1, 3],
+  [2, -1, -1, 1],
+  [1, -1, -1, 3],
+  [2, -1, -1, 3],
+];
+const rightStep3: Step[] = [...rightStep, ...rightStep, ...rightStep];
+const solveStepFuncs: ((
+  cube: Cube,
+  state: { v: number; w: number; f: number },
+) => (Step | null)[])[] = [
   (cube) => {
     if (cube.size % 2) {
       let retI: number;
-      const c = cube.size * .5 - .5
+      const c = cube.size * 0.5 - 0.5;
       switch (Color.W) {
         case cube.top.getAt(c, c):
           retI = 0;
@@ -763,192 +792,230 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
       }
       return whiteUp[retI];
     }
-    return []
+    return [];
   },
   (cube, state) => {
     if (cube.size < 4 || state.f === 5) {
-      return []
+      return [];
     }
-    const c = Math.floor((cube.size - 1) / 2) - state.v
-    const nc = ~c
+    const c = Math.floor((cube.size - 1) / 2) - state.v;
+    const nc = ~c;
     if (state.v === Math.floor((cube.size - 1) / 2)) {
-      state.f++
-      state.v = 0
-      state.w = 0
+      state.f++;
+      state.v = 0;
+      state.w = 0;
       if (cube.size % 2) {
         if (state.f === 5) {
-          return []
+          return [];
         }
-        const n = (["W", "R", "B", "O", "G", "Y"] as const)[state.f]
-        const c = cube.size * .5 - .5
+        const n = (["W", "R", "B", "O", "G", "Y"] as const)[state.f];
+        const c = cube.size * 0.5 - 0.5;
         switch (n) {
           case cube.front.getAt(c, c):
-            return [[2, 0, -1, 1]]
+            return [[2, 0, -1, 1]];
           case cube.left.getAt(c, c):
-            return [[0, 0, -1, 1]]
+            return [[0, 0, -1, 1]];
           case cube.back.getAt(c, c):
-            return [[2, 0, -1, 3]]
+            return [[2, 0, -1, 3]];
           case cube.right.getAt(c, c):
-            return [[0, 0, -1, 3]]
+            return [[0, 0, -1, 3]];
         }
       } else {
         switch (state.f) {
           case 1:
-            return [[2, 0, -1, 1]]
+            return [[2, 0, -1, 1]];
           case 2:
           case 3:
           case 4:
             switch (Color.W) {
               case cube.back.getAt(1, 1):
-                return [[0, 0, -1, 3]]
+                return [[0, 0, -1, 3]];
               case cube.left.getAt(1, 1):
-                return [[1, 0, -2, 1], [0, 0, -1, 3]]
+                return [
+                  [1, 0, -2, 1],
+                  [0, 0, -1, 3],
+                ];
               case cube.front.getAt(1, 1):
-                return [[1, 0, -2, 2], [0, 0, -1, 3]]
+                return [
+                  [1, 0, -2, 2],
+                  [0, 0, -1, 3],
+                ];
               case cube.right.getAt(1, 1):
-                return [[1, 0, -2, 3], [0, 0, -1, 3]]
+                return [
+                  [1, 0, -2, 3],
+                  [0, 0, -1, 3],
+                ];
             }
           case 5:
-            return []
+            return [];
         }
       }
     }
-    const w = (["W", "R", "B", "O", "G", "Y"] as const)[state.f]
-    const c0 = cube.top.getAt(c, c) === w ? "T" : "F"
-    const c1 = cube.top.getAt(nc, c) === w ? "T" : "F"
-    const c2 = cube.top.getAt(nc, nc) === w ? "T" : "F"
-    const c3 = cube.top.getAt(c, nc) === w ? "T" : "F"
+    const w = (["W", "R", "B", "O", "G", "Y"] as const)[state.f];
+    const c0 = cube.top.getAt(c, c) === w ? "T" : "F";
+    const c1 = cube.top.getAt(nc, c) === w ? "T" : "F";
+    const c2 = cube.top.getAt(nc, nc) === w ? "T" : "F";
+    const c3 = cube.top.getAt(c, nc) === w ? "T" : "F";
     if (state.w < 4) {
       switch (c0 + c1 + c2 + c3) {
         case "TTTT":
-          state.w++
-          return [null]
+          state.w++;
+          return [null];
         case "TTFT":
         case "TTFF":
         case "TFFF":
-          return [[1, -1, -1, 1]]
+          return [[1, -1, -1, 1]];
         case "TFTT":
         case "TFFT":
         case "FFFT":
-          return [[1, -1, -1, 2]]
+          return [[1, -1, -1, 2]];
         case "FTTT":
         case "FFTT":
         case "FFTF":
-          return [[1, -1, -1, 3]]
+          return [[1, -1, -1, 3]];
       }
       switch (w) {
         case cube.front.getAt(nc, c):
-          state.w++
-          return [[2, nc, nc, 1], [1, -1, -1, 3], [2, nc, nc, 3]]
+          state.w++;
+          return [
+            [2, nc, nc, 1],
+            [1, -1, -1, 3],
+            [2, nc, nc, 3],
+          ];
         case cube.front.getAt(nc, nc):
-          return [[0, -1, -1, 3]]
+          return [[0, -1, -1, 3]];
         case cube.front.getAt(c, nc):
-          return [[0, -1, -1, 2]]
+          return [[0, -1, -1, 2]];
         case cube.front.getAt(c, c):
-          return [[0, -1, -1, 1]]
+          return [[0, -1, -1, 1]];
         case cube.bottom.getAt(nc, c):
-          state.w++
-          return [[2, nc, nc, 2], [1, -1, -1, 3], [2, nc, nc, 2]]
+          state.w++;
+          return [
+            [2, nc, nc, 2],
+            [1, -1, -1, 3],
+            [2, nc, nc, 2],
+          ];
         case cube.bottom.getAt(nc, nc):
-          return [[1, 0, 0, 1]]
+          return [[1, 0, 0, 1]];
         case cube.bottom.getAt(c, nc):
-          return [[1, 0, 0, 2]]
+          return [[1, 0, 0, 2]];
         case cube.bottom.getAt(c, c):
-          return [[1, 0, 0, 3]]
+          return [[1, 0, 0, 3]];
         case cube.left.getAt(nc, c):
         case cube.left.getAt(nc, nc):
         case cube.left.getAt(c, nc):
         case cube.left.getAt(c, c):
-          return [[1, 0, -2, 3]]
+          return [[1, 0, -2, 3]];
         case cube.back.getAt(nc, c):
         case cube.back.getAt(nc, nc):
         case cube.back.getAt(c, nc):
         case cube.back.getAt(c, c):
-          return [[1, 0, -2, 2]]
+          return [[1, 0, -2, 2]];
         case cube.right.getAt(nc, c):
         case cube.right.getAt(nc, nc):
         case cube.right.getAt(c, nc):
         case cube.right.getAt(c, c):
-          return [[1, 0, -2, 1]]
+          return [[1, 0, -2, 1]];
       }
     }
     if (cube.size % 2 === 0 && state.v === 0) {
-      state.v++
-      state.w = 0
-      return [null]
+      state.v++;
+      state.w = 0;
+      return [null];
     }
-    const ci = Math.floor((cube.size - 1) / 2)
-    const x = 1 - cube.size % 2 + state.v + ci
-    const y = (state.w - 4) % (cube.size - 2 * (ci - state.v)) + ci - state.v
+    const ci = Math.floor((cube.size - 1) / 2);
+    const x = 1 - (cube.size % 2) + state.v + ci;
+    const y = ((state.w - 4) % (cube.size - 2 * (ci - state.v))) + ci - state.v;
     switch (w) {
       case cube.top.getAt(x, y):
-        state.w++
-        if (state.w === 4 + (cube.size - 2 * (ci - state.v) + 1 - cube.size % 2) * 4) {
-          state.v++
-          state.w = 0
-          return [null]
+        state.w++;
+        if (
+          state.w ===
+          4 + (cube.size - 2 * (ci - state.v) + 1 - (cube.size % 2)) * 4
+        ) {
+          state.v++;
+          state.w = 0;
+          return [null];
         }
-        return (state.w - 4) % (cube.size - 2 * (ci - state.v) + 1 - cube.size % 2) === 0 ? [[1, -1, -1, 1]] : [null]
+        return (state.w - 4) %
+          (cube.size - 2 * (ci - state.v) + 1 - (cube.size % 2)) ===
+          0
+          ? [[1, -1, -1, 1]]
+          : [null];
       case cube.front.getAt(x, y):
-        return [[2, x, x, 1], [1, -1, -1, 1], [2, ~y, ~y, 1], [1, -1, -1, 3],
-        [2, x, x, 3], [1, -1, -1, 1], [2, ~y, ~y, 3], [1, -1, -1, 3]
-        ]
+        return [
+          [2, x, x, 1],
+          [1, -1, -1, 1],
+          [2, ~y, ~y, 1],
+          [1, -1, -1, 3],
+          [2, x, x, 3],
+          [1, -1, -1, 1],
+          [2, ~y, ~y, 3],
+          [1, -1, -1, 3],
+        ];
       case cube.front.getAt(y, ~x):
-        return [[0, -1, -1, 1]]
+        return [[0, -1, -1, 1]];
       case cube.front.getAt(~x, ~y):
-        return [[0, -1, -1, 2]]
+        return [[0, -1, -1, 2]];
       case cube.front.getAt(~y, x):
-        return [[0, -1, -1, 3]]
+        return [[0, -1, -1, 3]];
       case cube.bottom.getAt(x, y):
-        return [[2, x, x, 2], [1, -1, -1, 1], [2, ~y, ~y, 2], [1, -1, -1, 3],
-        [2, x, x, 2], [1, -1, -1, 1], [2, ~y, ~y, 2], [1, -1, -1, 3]
-        ]
+        return [
+          [2, x, x, 2],
+          [1, -1, -1, 1],
+          [2, ~y, ~y, 2],
+          [1, -1, -1, 3],
+          [2, x, x, 2],
+          [1, -1, -1, 1],
+          [2, ~y, ~y, 2],
+          [1, -1, -1, 3],
+        ];
       case cube.bottom.getAt(y, ~x):
-        return [[1, 0, 0, 3]]
+        return [[1, 0, 0, 3]];
       case cube.bottom.getAt(~x, ~y):
-        return [[1, 0, 0, 2]]
+        return [[1, 0, 0, 2]];
       case cube.bottom.getAt(~y, x):
-        return [[1, 0, 0, 1]]
+        return [[1, 0, 0, 1]];
       case cube.right.getAt(x, y):
       case cube.right.getAt(y, ~x):
       case cube.right.getAt(~x, ~y):
       case cube.right.getAt(~y, x):
-        return [[1, 0, -2, 1]]
+        return [[1, 0, -2, 1]];
       case cube.back.getAt(x, y):
       case cube.back.getAt(y, ~x):
       case cube.back.getAt(~x, ~y):
       case cube.back.getAt(~y, x):
-        return [[1, 0, -2, 2]]
+        return [[1, 0, -2, 2]];
       case cube.left.getAt(x, y):
       case cube.left.getAt(y, ~x):
       case cube.left.getAt(~x, ~y):
       case cube.left.getAt(~y, x):
-        return [[1, 0, -2, 3]]
+        return [[1, 0, -2, 3]];
     }
-    return []
+    return [];
   },
   (cube, state) => {
     if (cube.size < 4) {
-      return []
+      return [];
     }
-    const c1 = cube.top.getAt(Math.floor((cube.size - 1) / 2), -1)
-    const c2 = cube.front.getAt(Math.floor((cube.size - 1) / 2), 0)
+    const c1 = cube.top.getAt(Math.floor((cube.size - 1) / 2), -1);
+    const c2 = cube.front.getAt(Math.floor((cube.size - 1) / 2), 0);
     if (state.w === cube.size - 2) {
-      let isFinished = true
+      let isFinished = true;
       loop: for (let i = 1; i < cube.size - 1; i++) {
-        const u1 = cube.top.getAt(i, -1)
-        const u2 = cube.front.getAt(i, 0)
+        const u1 = cube.top.getAt(i, -1);
+        const u2 = cube.front.getAt(i, 0);
         switch (c1 + c2) {
           case u1 + u2:
           case u2 + u1:
-            continue loop
+            continue loop;
           default:
-            isFinished = false
-            break loop
+            isFinished = false;
+            break loop;
         }
       }
       if (isFinished) {
-        state.f++
+        state.f++;
         switch (state.f) {
           case 1:
           case 2:
@@ -956,161 +1023,180 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
           case 5:
           case 6:
           case 7:
-            return [[0, -1, -1, 1]]
+            return [[0, -1, -1, 1]];
           case 4:
-            return [[1, 0, -1, 2]]
+            return [[1, 0, -1, 2]];
           case 8:
-            return [[1, 0, -1, 1]]
+            return [[1, 0, -1, 1]];
           case 9:
           case 10:
-            return [[2, 0, -1, 1]]
+            return [[2, 0, -1, 1]];
           case 11:
-            return []
+            return [];
         }
       } else {
-        state.w = 0
-        state.f = 0
-        return [null]
+        state.w = 0;
+        state.f = 0;
+        return [null];
       }
-
     }
-    const y = state.w + 1
-    const ny = ~y
-    const u1 = cube.top.getAt(y, -1)
-    const u2 = cube.front.getAt(y, 0)
-    const f1 = cube.front.getAt(-1, ny)
-    const f2 = cube.right.getAt(0, ny)
-    const rrc = cube.right.getAt(-1, ny)
-    const blc = cube.back.getAt(0, ny)
-    const brc = cube.back.getAt(-1, ny)
-    const llc = cube.left.getAt(0, ny)
-    const lrc = cube.left.getAt(-1, ny)
-    const flc = cube.front.getAt(0, ny)
-    const frn = cube.front.getAt(-1, y)
-    const rln = cube.right.getAt(0, y)
-    const rrn = cube.right.getAt(-1, y)
-    const bln = cube.back.getAt(0, y)
-    const brn = cube.back.getAt(-1, y)
-    const lln = cube.left.getAt(0, y)
-    const lrn = cube.left.getAt(-1, y)
-    const fln = cube.front.getAt(0, y)
-    const trc = cube.top.getAt(-1, y)
-    const rtc = cube.right.getAt(ny, 0)
-    const orc = cube.bottom.getAt(-1, ny)
-    const rbc = cube.right.getAt(ny, -1)
-    const trn = cube.top.getAt(-1, ny)
-    const rtn = cube.right.getAt(y, 0)
-    const orn = cube.bottom.getAt(-1, y)
-    const rbn = cube.right.getAt(y, -1)
-    const ttc = cube.top.getAt(y, 0)
-    const btc = cube.back.getAt(ny, 0)
-    const bbc = cube.back.getAt(ny, -1)
-    const obc = cube.bottom.getAt(y, -1)
-    const ttn = cube.top.getAt(ny, 0)
-    const btn = cube.back.getAt(y, 0)
-    const bbn = cube.back.getAt(y, -1)
-    const obn = cube.bottom.getAt(ny, -1)
-    const tlc = cube.top.getAt(0, ny)
-    const ltc = cube.left.getAt(ny, 0)
-    const lbc = cube.left.getAt(ny, -1)
-    const olc = cube.bottom.getAt(0, y)
-    const tln = cube.top.getAt(0, y)
-    const ltn = cube.left.getAt(y, 0)
-    const lbn = cube.left.getAt(y, -1)
-    const oln = cube.bottom.getAt(0, ny)
-    const fbc = cube.front.getAt(y, -1)
-    const otc = cube.bottom.getAt(y, 0)
-    const fbn = cube.front.getAt(ny, -1)
-    const otn = cube.bottom.getAt(ny, 0)
+    const y = state.w + 1;
+    const ny = ~y;
+    const u1 = cube.top.getAt(y, -1);
+    const u2 = cube.front.getAt(y, 0);
+    const f1 = cube.front.getAt(-1, ny);
+    const f2 = cube.right.getAt(0, ny);
+    const rrc = cube.right.getAt(-1, ny);
+    const blc = cube.back.getAt(0, ny);
+    const brc = cube.back.getAt(-1, ny);
+    const llc = cube.left.getAt(0, ny);
+    const lrc = cube.left.getAt(-1, ny);
+    const flc = cube.front.getAt(0, ny);
+    const frn = cube.front.getAt(-1, y);
+    const rln = cube.right.getAt(0, y);
+    const rrn = cube.right.getAt(-1, y);
+    const bln = cube.back.getAt(0, y);
+    const brn = cube.back.getAt(-1, y);
+    const lln = cube.left.getAt(0, y);
+    const lrn = cube.left.getAt(-1, y);
+    const fln = cube.front.getAt(0, y);
+    const trc = cube.top.getAt(-1, y);
+    const rtc = cube.right.getAt(ny, 0);
+    const orc = cube.bottom.getAt(-1, ny);
+    const rbc = cube.right.getAt(ny, -1);
+    const trn = cube.top.getAt(-1, ny);
+    const rtn = cube.right.getAt(y, 0);
+    const orn = cube.bottom.getAt(-1, y);
+    const rbn = cube.right.getAt(y, -1);
+    const ttc = cube.top.getAt(y, 0);
+    const btc = cube.back.getAt(ny, 0);
+    const bbc = cube.back.getAt(ny, -1);
+    const obc = cube.bottom.getAt(y, -1);
+    const ttn = cube.top.getAt(ny, 0);
+    const btn = cube.back.getAt(y, 0);
+    const bbn = cube.back.getAt(y, -1);
+    const obn = cube.bottom.getAt(ny, -1);
+    const tlc = cube.top.getAt(0, ny);
+    const ltc = cube.left.getAt(ny, 0);
+    const lbc = cube.left.getAt(ny, -1);
+    const olc = cube.bottom.getAt(0, y);
+    const tln = cube.top.getAt(0, y);
+    const ltn = cube.left.getAt(y, 0);
+    const lbn = cube.left.getAt(y, -1);
+    const oln = cube.bottom.getAt(0, ny);
+    const fbc = cube.front.getAt(y, -1);
+    const otc = cube.bottom.getAt(y, 0);
+    const fbn = cube.front.getAt(ny, -1);
+    const otn = cube.bottom.getAt(ny, 0);
     switch (c1 + c2) {
       case u1 + u2:
       case u2 + u1:
-        state.w++
-        return [null]
+        state.w++;
+        return [null];
       case f1 + f2:
       case f2 + f1:
-        return [[1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 3], [2, ny, ny, 3],
-        [1, 0, -1, 1], ...leftStep, [1, 0, -1, 3], [2, ny, ny, 1], [0, 0, 0, 1], [1, 0, -2, 1],
-        [2, 0, 0, 3], [0, 0, -2, 1], [1, -1, -1, 1], [2, -1, -1, 1], [1, -1, -1, 3], [2, ny, ny, 3],
-        [1, 0, -1, 1], ...leftStep, [1, 0, -1, 3], [2, ny, ny, 1], [0, -1, -1, 2], [2, 0, -1, 1]]
+        return [
+          [1, -1, -1, 1],
+          [2, -1, -1, 1],
+          [1, -1, -1, 3],
+          [2, ny, ny, 3],
+          [1, 0, -1, 1],
+          ...leftStep,
+          [1, 0, -1, 3],
+          [2, ny, ny, 1],
+          [0, 0, 0, 1],
+          [1, 0, -2, 1],
+          [2, 0, 0, 3],
+          [0, 0, -2, 1],
+          [1, -1, -1, 1],
+          [2, -1, -1, 1],
+          [1, -1, -1, 3],
+          [2, ny, ny, 3],
+          [1, 0, -1, 1],
+          ...leftStep,
+          [1, 0, -1, 3],
+          [2, ny, ny, 1],
+          [0, -1, -1, 2],
+          [2, 0, -1, 1],
+        ];
       case rrc + blc:
       case blc + rrc:
-        return [[1, 0, -2, 1]]
+        return [[1, 0, -2, 1]];
       case brc + llc:
       case llc + brc:
-        return [[1, 0, -2, 2]]
+        return [[1, 0, -2, 2]];
       case lrc + flc:
       case flc + lrc:
-        return [[1, 0, -2, 3]]
+        return [[1, 0, -2, 3]];
       case frn + rln:
       case rln + frn:
       case rrn + bln:
       case bln + rrn:
-        return [[2, -1, -1, 2]]
+        return [[2, -1, -1, 2]];
       case brn + lln:
       case lln + brn:
       case lrn + fln:
       case fln + lrn:
-        return [[2, 0, 0, 2]]
+        return [[2, 0, 0, 2]];
       case trc + rtc:
       case rtc + trc:
       case orc + rbc:
       case rbc + orc:
-        return [[2, -1, -1, 1]]
+        return [[2, -1, -1, 1]];
       case trn + rtn:
       case rtn + trn:
       case orn + rbn:
       case rbn + orn:
-        return [[2, -1, -1, 3]]
+        return [[2, -1, -1, 3]];
       case ttc + btc:
       case btc + ttc:
       case bbc + obc:
       case obc + bbc:
-        return [[0, 0, 0, 1]]
+        return [[0, 0, 0, 1]];
       case ttn + btn:
       case btn + ttn:
       case bbn + obn:
       case obn + bbn:
-        return [[0, 0, 0, 3]]
+        return [[0, 0, 0, 3]];
       case tlc + ltc:
       case ltc + tlc:
       case lbc + olc:
       case olc + lbc:
-        return [[2, 0, 0, 1]]
+        return [[2, 0, 0, 1]];
       case tln + ltn:
       case ltn + tln:
       case lbn + oln:
       case oln + lbn:
-        return [[2, 0, 0, 3]]
+        return [[2, 0, 0, 3]];
       case fbc + otc:
       case otc + fbc:
       case fbn + otn:
       case otn + fbn:
-        return [[1, 0, 0, 1]]
+        return [[1, 0, 0, 1]];
     }
-    return []
+    return [];
   },
   (cube, state) => {
     if (cube.size < 4) {
-      return []
+      return [];
     }
-    const c1 = cube.top.getAt(Math.floor((cube.size - 1) / 2), -1)
-    const c2 = cube.front.getAt(Math.floor((cube.size - 1) / 2), 0)
+    const c1 = cube.top.getAt(Math.floor((cube.size - 1) / 2), -1);
+    const c2 = cube.front.getAt(Math.floor((cube.size - 1) / 2), 0);
     if (state.w === Math.floor((cube.size - 3) / 2)) {
-      let isFinished = true
+      let isFinished = true;
       loop: for (let i = 1; i < Math.floor((cube.size - 3) / 2) + 1; i++) {
-        const u1 = cube.top.getAt(i, -1)
-        const u2 = cube.front.getAt(i, 0)
+        const u1 = cube.top.getAt(i, -1);
+        const u2 = cube.front.getAt(i, 0);
         switch (c1 + c2) {
           case u1 + u2:
-            continue loop
+            continue loop;
           default:
-            isFinished = false
-            break loop
+            isFinished = false;
+            break loop;
         }
       }
       if (isFinished) {
-        state.f++
+        state.f++;
         switch (state.f) {
           case 1:
           case 2:
@@ -1118,33 +1204,48 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
           case 5:
           case 6:
           case 7:
-            return [[0, -1, -1, 1]]
+            return [[0, -1, -1, 1]];
           case 4:
-            return [[1, 0, -1, 2]]
+            return [[1, 0, -1, 2]];
           case 8:
-            return [[1, 0, -1, 1]]
+            return [[1, 0, -1, 1]];
           case 9:
           case 10:
-            return [[2, 0, -1, 1]]
+            return [[2, 0, -1, 1]];
           case 11:
-            return []
+            return [];
         }
       } else {
-        state.w = 0
-        state.f = 0
-        return [null]
+        state.w = 0;
+        state.f = 0;
+        return [null];
       }
     }
-    const y = state.w + 1
-    const ny = ~y
-    const u1 = cube.top.getAt(y, -1)
-    const u2 = cube.front.getAt(y, 0)
+    const y = state.w + 1;
+    const ny = ~y;
+    const u1 = cube.top.getAt(y, -1);
+    const u2 = cube.front.getAt(y, 0);
     if (c1 === u1 && c2 === u2) {
-      state.w++
-      return [null]
+      state.w++;
+      return [null];
     } else {
-      return [[2, y, y, 2], [0, 0, 0, 2], [1, -1, -1, 2], [2, ny, ny, 3], [1, -1, -1, 2], [2, y, y, 3], [1, -1, -1, 2],
-      [2, y, y, 1], [1, -1, -1, 2], [0, -1, -1, 2], [2, y, y, 1], [0, -1, -1, 2], [2, ny, ny, 1], [0, 0, 0, 2], [2, y, y, 2]]
+      return [
+        [2, y, y, 2],
+        [0, 0, 0, 2],
+        [1, -1, -1, 2],
+        [2, ny, ny, 3],
+        [1, -1, -1, 2],
+        [2, y, y, 3],
+        [1, -1, -1, 2],
+        [2, y, y, 1],
+        [1, -1, -1, 2],
+        [0, -1, -1, 2],
+        [2, y, y, 1],
+        [0, -1, -1, 2],
+        [2, ny, ny, 1],
+        [0, 0, 0, 2],
+        [2, y, y, 2],
+      ];
     }
   },
   (cube) => {
@@ -1264,9 +1365,9 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
         return state.v === 4
           ? [[0, -1, -1, 2]]
           : [
-            [0, -1, -1, 2],
-            [1, 0, -1, 1],
-          ];
+              [0, -1, -1, 2],
+              [1, 0, -1, 1],
+            ];
       case cube.left.getAt(1, 0) + cube.top.getAt(0, 1):
         return [[1, -1, -1, 3]];
       case cube.back.getAt(1, 0) + cube.top.getAt(1, 0):
@@ -1278,214 +1379,279 @@ const solveStepFuncs: ((cube: Cube, state: { v: number, w: number, f: number }) 
   },
   (cube, state) => {
     if (state.v === 20) {
-      return []
+      return [];
     }
     if (state.v % 5 === 4) {
-
-      state.v -= 4
+      state.v -= 4;
       if (state.v === 0) {
-        return [[1, 0, -1, 1], ...rightStep, [1, 0, -1, 1], ...rightStep, [1, 0, -1, 1], ...rightStep, [1, 0, -1, 1]]
+        return [
+          [1, 0, -1, 1],
+          ...rightStep,
+          [1, 0, -1, 1],
+          ...rightStep,
+          [1, 0, -1, 1],
+          ...rightStep,
+          [1, 0, -1, 1],
+        ];
       }
       if (state.v === 5) {
-        return [[1, 0, -1, 1], ...rightStep, [1, 0, -1, 1], ...rightStep, [1, 0, -1, 2]]
+        return [
+          [1, 0, -1, 1],
+          ...rightStep,
+          [1, 0, -1, 1],
+          ...rightStep,
+          [1, 0, -1, 2],
+        ];
       }
       if (state.v === 10) {
-        return [[1, 0, -1, 1], ...rightStep, [1, 0, -1, 3]]
+        return [[1, 0, -1, 1], ...rightStep, [1, 0, -1, 3]];
       }
     }
-    const c1 = cube.front.getAt(1, -1)
-    const c2 = cube.right.getAt(1, -1)
-    const b1 = cube.front.getAt(-1, -1)
-    const b2 = cube.right.getAt(0, -1)
-    const b3 = cube.bottom.getAt(-1, 0)
-    const a1 = cube.top.getAt(-1, -1)
-    const a2 = cube.front.getAt(-1, 0)
-    const a3 = cube.right.getAt(0, 0)
+    const c1 = cube.front.getAt(1, -1);
+    const c2 = cube.right.getAt(1, -1);
+    const b1 = cube.front.getAt(-1, -1);
+    const b2 = cube.right.getAt(0, -1);
+    const b3 = cube.bottom.getAt(-1, 0);
+    const a1 = cube.top.getAt(-1, -1);
+    const a2 = cube.front.getAt(-1, 0);
+    const a3 = cube.right.getAt(0, 0);
     switch (c1 + c2) {
       case b1 + b2:
-        state.v = Math.floor(state.v / 5 + 1) * 5
-        return state.v === 20 ? [] : [[1, 0, -1, 1]]
+        state.v = Math.floor(state.v / 5 + 1) * 5;
+        return state.v === 20 ? [] : [[1, 0, -1, 1]];
       case b3 + b1:
-        state.v = Math.floor(state.v / 5 + 1) * 5
-        return [[1, 0, -1, 1], ...leftStep, ...leftStep]
+        state.v = Math.floor(state.v / 5 + 1) * 5;
+        return [[1, 0, -1, 1], ...leftStep, ...leftStep];
       case b2 + b3:
-        return [...rightStep, ...rightStep]
+        return [...rightStep, ...rightStep];
       case a3 + a2:
-        return [...rightStep, ...rightStep, ...rightStep]
+        return [...rightStep, ...rightStep, ...rightStep];
       case a2 + a1:
-        state.v = Math.floor(state.v / 5 + 1) * 5
-        return [[1, 0, -1, 1], ...leftStep]
+        state.v = Math.floor(state.v / 5 + 1) * 5;
+        return [[1, 0, -1, 1], ...leftStep];
       case a1 + a3:
-        return rightStep
+        return rightStep;
       default:
-        state.v++
-        return [[1, -1, -1, 1]]
+        state.v++;
+        return [[1, -1, -1, 1]];
     }
   },
   (cube, state) => {
     if (state.v === 20) {
-      return []
+      return [];
     }
     if (state.v % 5 === 4) {
-      state.v -= 4
+      state.v -= 4;
 
       if (state.v === 0) {
-        return [...insertRightEdge, ...insertRightEdge, ...insertRightEdge, ...insertRightEdge]
+        return [
+          ...insertRightEdge,
+          ...insertRightEdge,
+          ...insertRightEdge,
+          ...insertRightEdge,
+        ];
       }
       if (state.v === 5) {
-        return [...insertRightEdge, ...insertRightEdge, ...insertRightEdge, [1, 0, -1, 1]]
+        return [
+          ...insertRightEdge,
+          ...insertRightEdge,
+          ...insertRightEdge,
+          [1, 0, -1, 1],
+        ];
       }
       if (state.v === 10) {
-        return [...insertRightEdge, ...insertRightEdge, [1, 0, -1, 2]]
+        return [...insertRightEdge, ...insertRightEdge, [1, 0, -1, 2]];
       }
       if (state.v === 15) {
-        return [...insertRightEdge, [1, 0, -1, 3]]
+        return [...insertRightEdge, [1, 0, -1, 3]];
       }
     }
-    const fc = cube.front.getAt(1, 1)
-    const rc = cube.right.getAt(1, 1)
-    const fr = cube.front.getAt(-1, 1)
-    const rl = cube.right.getAt(0, 1)
+    const fc = cube.front.getAt(1, 1);
+    const rc = cube.right.getAt(1, 1);
+    const fr = cube.front.getAt(-1, 1);
+    const rl = cube.right.getAt(0, 1);
     if (fc === fr && rc === rl) {
-      state.v = Math.floor(state.v / 5 + 1) * 5
-      return state.v === 20 ? [] : [[1, 0, -1, 1]]
+      state.v = Math.floor(state.v / 5 + 1) * 5;
+      return state.v === 20 ? [] : [[1, 0, -1, 1]];
     }
-    const ft = cube.front.getAt(1, 0)
-    const tf = cube.top.getAt(1, -1)
+    const ft = cube.front.getAt(1, 0);
+    const tf = cube.top.getAt(1, -1);
     if (ft === fc && tf === rc) {
-      return insertRightEdge
+      return insertRightEdge;
     }
-    const rt = cube.right.getAt(1, 0)
-    const tr = cube.top.getAt(-1, 1)
+    const rt = cube.right.getAt(1, 0);
+    const tr = cube.top.getAt(-1, 1);
     if (rt === rc && tr === fc) {
-      state.v = Math.floor(state.v / 5 + 1) * 5
-      return state.v === 20 ? [[1, 0, -1, 1], ...insertLeftEdge,] : [[1, 0, -1, 1], ...insertLeftEdge, [1, 0, -1, 1]]
+      state.v = Math.floor(state.v / 5 + 1) * 5;
+      return state.v === 20
+        ? [[1, 0, -1, 1], ...insertLeftEdge]
+        : [[1, 0, -1, 1], ...insertLeftEdge, [1, 0, -1, 1]];
     }
-    state.v++
-    return [[1, -1, -1, 1]]
+    state.v++;
+    return [[1, -1, -1, 1]];
   },
   (cube) => {
-    const t = cube.top.getAt(1, 0) === Color.W ? "W" : "N"
-    const r = cube.top.getAt(-1, 1) === Color.W ? "W" : "N"
-    const b = cube.top.getAt(1, -1) === Color.W ? "W" : "N"
-    const l = cube.top.getAt(0, 1) === Color.W ? "W" : "N"
+    const t = cube.top.getAt(1, 0) === Color.W ? "W" : "N";
+    const r = cube.top.getAt(-1, 1) === Color.W ? "W" : "N";
+    const b = cube.top.getAt(1, -1) === Color.W ? "W" : "N";
+    const l = cube.top.getAt(0, 1) === Color.W ? "W" : "N";
     switch (t + r + b + l) {
       case "WWWW":
-        return []
+        return [];
       case "WNWN":
       case "NWNW":
       case "WNNW":
-        return whiteX
+        return whiteX;
       case "NNNN":
-        return whiteX2
+        return whiteX2;
       case "NNWW":
-        return [[1, -1, -1, 1]]
+        return [[1, -1, -1, 1]];
       case "NWWN":
-        return [[1, -1, -1, 2]]
+        return [[1, -1, -1, 2]];
       case "WWNN":
-        return [[1, -1, -1, 3]]
+        return [[1, -1, -1, 3]];
     }
-    const ci = Math.floor((cube.size - 2) / 2)
-    const nci = ~ci
-    return [[2, 1, ci, 2], [0, 0, 0, 2], [1, -1, -1, 2], [2, nci, -2, 3], [1, -1, -1, 2], [2, 1, ci, 3], [1, -1, -1, 2],
-    [2, 1, ci, 1], [1, -1, -1, 2], [0, -1, -1, 2], [2, 1, ci, 1], [0, -1, -1, 2], [2, nci, -2, 1], [0, 0, 0, 2], [2, 1, ci, 2]]
+    const ci = Math.floor((cube.size - 2) / 2);
+    const nci = ~ci;
+    return [
+      [2, 1, ci, 2],
+      [0, 0, 0, 2],
+      [1, -1, -1, 2],
+      [2, nci, -2, 3],
+      [1, -1, -1, 2],
+      [2, 1, ci, 3],
+      [1, -1, -1, 2],
+      [2, 1, ci, 1],
+      [1, -1, -1, 2],
+      [0, -1, -1, 2],
+      [2, 1, ci, 1],
+      [0, -1, -1, 2],
+      [2, nci, -2, 1],
+      [0, 0, 0, 2],
+      [2, 1, ci, 2],
+    ];
   },
   (cube) => {
-    const t = cube.back.getAt(1, 0)
-    const r = cube.right.getAt(1, 0)
-    const b = cube.front.getAt(1, 0)
-    const l = cube.left.getAt(1, 0)
-    const fe = cube.front.getAt(1, 1) === b ? "F" : "N"
-    const le = cube.left.getAt(1, 1) === l ? "L" : "N"
-    const be = cube.back.getAt(1, 1) === t ? "B" : "N"
-    const re = cube.right.getAt(1, 1) === r ? "R" : "N"
+    const t = cube.back.getAt(1, 0);
+    const r = cube.right.getAt(1, 0);
+    const b = cube.front.getAt(1, 0);
+    const l = cube.left.getAt(1, 0);
+    const fe = cube.front.getAt(1, 1) === b ? "F" : "N";
+    const le = cube.left.getAt(1, 1) === l ? "L" : "N";
+    const be = cube.back.getAt(1, 1) === t ? "B" : "N";
+    const re = cube.right.getAt(1, 1) === r ? "R" : "N";
 
     switch (fe + le + be + re) {
       case "FLBR":
-        return []
+        return [];
       case "FLNN":
       case "FNBN":
-        return whiteEdge
+        return whiteEdge;
       case "FNNR":
-        return [[1, 0, -1, 1]]
+        return [[1, 0, -1, 1]];
       case "NNBR":
-        return [[1, 0, -1, 2]]
+        return [[1, 0, -1, 2]];
       case "NLBN":
-        return [[1, 0, -1, 3]]
+        return [[1, 0, -1, 3]];
       default:
-        return [[1, -1, -1, 1]]
-
+        return [[1, -1, -1, 1]];
     }
   },
-  (cube) => cube.top.getAt(1, 1) === "W" ? [[0, 0, -1, 2]] : [],
+  (cube) => (cube.top.getAt(1, 1) === "W" ? [[0, 0, -1, 2]] : []),
   (cube, state) => {
     if (state.v === 4) {
-      return []
+      return [];
     }
     if (cube.bottom.getAt(-1, 0) === "W") {
-      state.v++
-      return [[1, 0, 0, 1]]
+      state.v++;
+      return [[1, 0, 0, 1]];
     } else {
-      return rightStep
+      return rightStep;
     }
   },
   (cube, state) => {
-    const fb = cube.front.getAt(1, -1)
-    const fc = cube.front.getAt(-1, -1)
+    const fb = cube.front.getAt(1, -1);
+    const fc = cube.front.getAt(-1, -1);
     if (fb === fc) {
-      state.v++
-      return state.v === 4 ? [] : [[1, 0, 0, 1]]
+      state.v++;
+      return state.v === 4 ? [] : [[1, 0, 0, 1]];
     } else {
-      state.v = 0
-      state.w++
-      return [...rightStep3, [1, 0, 0, 1], ...rightStep3, [1, 0, 0, 3], ...rightStep3, [1, 0, 0, 1]]
+      state.v = 0;
+      state.w++;
+      return [
+        ...rightStep3,
+        [1, 0, 0, 1],
+        ...rightStep3,
+        [1, 0, 0, 3],
+        ...rightStep3,
+        [1, 0, 0, 1],
+      ];
     }
   },
   (cube) => {
-    const c = cube.front.getAt(1, 1)
-    const f = cube.front.getAt(1, -1)
-    const r = cube.right.getAt(1, -1)
-    const b = cube.back.getAt(1, -1)
-    const l = cube.left.getAt(1, -1)
+    const c = cube.front.getAt(1, 1);
+    const f = cube.front.getAt(1, -1);
+    const r = cube.right.getAt(1, -1);
+    const b = cube.back.getAt(1, -1);
+    const l = cube.left.getAt(1, -1);
     switch (c) {
       case f:
-        return []
+        return [];
       case r:
-        return [[1, 0, 0, 1]]
+        return [[1, 0, 0, 1]];
       case b:
-        return [[1, 0, 0, 2]]
+        return [[1, 0, 0, 2]];
       case l:
-        return [[1, 0, 0, 3]]
+        return [[1, 0, 0, 3]];
     }
-    return []
-  }
+    return [];
+  },
 ];
 type Step = [axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3];
 class Solver {
-  constructor(public cube: Cube) { }
+  constructor(public cube: Cube) {}
   async solve(startAt: SolveStep = 0) {
     const state = { v: 0, w: 0, f: 0 };
     while (SolveStep[startAt] !== undefined) {
-      const queue: (Step | null)[] = solveStepFuncs[startAt](this.cube, state).slice();
+      const queue: (Step | null)[] = solveStepFuncs[startAt](
+        this.cube,
+        state,
+      ).slice();
       if (queue[0] === null || queue.length) {
         let step: Step | null | undefined;
         while ((step = queue.shift())) {
-          step && await this.cube.rotate(...step);
+          step && (await this.cube.rotate(...step));
         }
       } else {
-        if (startAt === SolveStep.LAST_CORNER && this.cube.top.getAt(0, 0) !== Color.Y) {
-          const ci = Math.floor((this.cube.size - 2) / 2)
-          for (const h of [...rightStep3, [1, 0, 0, 1], ...rightStep3, [1, 0, 0, 3], ...rightStep3, [0, 0, -1, 2],
-          [2, 1, ci, 2], [0, -1, -1, 2], [1, -1, -1, 2], [2, 1, ci, 2], [1, -1, -1, 2], [0, -1, -1, 2], [2, 1, ci, 2],] as Step[]) {
-            await this.cube.rotate(...h)
+        if (
+          startAt === SolveStep.LAST_CORNER &&
+          this.cube.top.getAt(0, 0) !== Color.Y
+        ) {
+          const ci = Math.floor((this.cube.size - 2) / 2);
+          for (const h of [
+            ...rightStep3,
+            [1, 0, 0, 1],
+            ...rightStep3,
+            [1, 0, 0, 3],
+            ...rightStep3,
+            [0, 0, -1, 2],
+            [2, 1, ci, 2],
+            [0, -1, -1, 2],
+            [1, -1, -1, 2],
+            [2, 1, ci, 2],
+            [1, -1, -1, 2],
+            [0, -1, -1, 2],
+            [2, 1, ci, 2],
+          ] as Step[]) {
+            await this.cube.rotate(...h);
           }
-          startAt = SolveStep.WHITE_EDGE
+          startAt = SolveStep.WHITE_EDGE;
         } else {
           startAt++;
         }
         state.v = 0;
-        state.w = 0
-        state.f = 0
+        state.w = 0;
+        state.f = 0;
       }
     }
   }
@@ -1636,7 +1802,7 @@ const backSplit2 = ref<HTMLCanvasElement>();
 const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
-const animationSpeed = ref(4)
+const animationSpeed = ref(4);
 onMounted(async () => {
   const size = 6;
   const cube = new Cube(
@@ -1683,8 +1849,8 @@ onMounted(async () => {
     size,
   );
   watchEffect(() => {
-    cube.animationSpeed = 2 ** animationSpeed.value
-  })
+    cube.animationSpeed = 2 ** animationSpeed.value;
+  });
   while (true) {
     for (let i = 0; i < size * 4; i++) {
       const axis = Math.floor(Math.random() * 3) as 0 | 1 | 2;
@@ -1699,9 +1865,9 @@ onMounted(async () => {
     const solver = new Solver(cube);
     await solver.solve();
     await new Promise<void>((resolve) => {
-      setTimeout(() => resolve(), 3000)
-    })
-    break
+      setTimeout(() => resolve(), 3000);
+    });
+    break;
   }
 });
 </script>
@@ -1714,7 +1880,8 @@ onMounted(async () => {
   transform-style: preserve-3d;
   --rotY: v-bind(rotY);
   --rotX: v-bind(rotX);
-  transform: rotateX(calc(var(--rotX) * 1deg)) rotateY(calc(var(--rotY) * 1deg)) translateX(-25vmin) translateY(-25vmin);
+  transform: rotateX(calc(var(--rotX) * 1deg)) rotateY(calc(var(--rotY) * 1deg))
+    translateX(-25vmin) translateY(-25vmin);
 }
 
 .face {
@@ -1735,27 +1902,33 @@ onMounted(async () => {
 }
 
 .x0 {
-  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin)) rotate(v-bind(xRotDeg));
+  transform: rotateY(calc(90deg * 0)) translateZ(v-bind(x0OffsetVMmin))
+    rotate(v-bind(xRotDeg));
 }
 
 .x1 {
-  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin)) rotate(v-bind(xRotDegMinus));
+  transform: rotateY(calc(90deg * 2)) translateZ(v-bind(x1OffsetVMmin))
+    rotate(v-bind(xRotDegMinus));
 }
 
 .y0 {
-  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin)) rotate(v-bind(yRotDeg));
+  transform: rotateX(calc(90deg * 1)) translateZ(v-bind(y0OffsetVMmin))
+    rotate(v-bind(yRotDeg));
 }
 
 .y1 {
-  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin)) rotate(v-bind(yRotDegMinus));
+  transform: rotateX(calc(90deg * 3)) translateZ(v-bind(y1OffsetVMmin))
+    rotate(v-bind(yRotDegMinus));
 }
 
 .z0 {
-  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin)) rotate(v-bind(zRotDeg));
+  transform: rotateY(calc(90deg * 1)) translateZ(v-bind(z0OffsetVMmin))
+    rotate(v-bind(zRotDeg));
 }
 
 .z1 {
-  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin)) rotate(v-bind(zRotDegMinus));
+  transform: rotateY(calc(90deg * 3)) translateZ(v-bind(z1OffsetVMmin))
+    rotate(v-bind(zRotDegMinus));
 }
 
 .ix0 {
@@ -1809,7 +1982,9 @@ onMounted(async () => {
   left: v-bind(topLeft);
   width: v-bind(topWidth);
   height: v-bind(topHeight);
-  transform: translate3d(v-bind(leftRotOffset), v-bind(backRotOffset), -25vmin) rotateY(v-bind(xRotDeg)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(frontRotOffset), 25vmin);
+  transform: translate3d(v-bind(leftRotOffset), v-bind(backRotOffset), -25vmin)
+    rotateY(v-bind(xRotDeg)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(frontRotOffset), 25vmin);
 }
 
 .top2 {
@@ -1835,7 +2010,9 @@ onMounted(async () => {
   left: v-bind(topLeft);
   width: v-bind(topWidth);
   height: v-bind(topHeight);
-  transform: translate3d(v-bind(leftRotOffset), v-bind(frontRotOffset), -25vmin) rotateY(v-bind(xRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(backRotOffset), 25vmin);
+  transform: translate3d(v-bind(leftRotOffset), v-bind(frontRotOffset), -25vmin)
+    rotateY(v-bind(xRotDegMinus)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(backRotOffset), 25vmin);
 }
 
 .bottom2 {
@@ -1861,9 +2038,13 @@ onMounted(async () => {
   left: v-bind(frontLeft);
   width: v-bind(frontWidth);
   height: v-bind(frontHeight);
-  transform: translate3d(v-bind(leftRotOffset),
+  transform: translate3d(
+      v-bind(leftRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDeg)) translate3d(v-bind(rightRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDeg))
+    translate3d(v-bind(rightRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .front2 {
@@ -1889,9 +2070,13 @@ onMounted(async () => {
   left: v-bind(rightLeft);
   width: v-bind(rightWidth);
   height: v-bind(rightHeight);
-  transform: translate3d(v-bind(frontRotOffset),
+  transform: translate3d(
+      v-bind(frontRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDegMinus)) translate3d(v-bind(backRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDegMinus))
+    translate3d(v-bind(backRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .right2 {
@@ -1917,9 +2102,13 @@ onMounted(async () => {
   right: v-bind(frontLeft);
   width: v-bind(frontWidth);
   height: v-bind(frontHeight);
-  transform: translate3d(v-bind(rightRotOffset),
+  transform: translate3d(
+      v-bind(rightRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDegMinus)) translate3d(v-bind(leftRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(zRotDegMinus))
+    translate3d(v-bind(leftRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .back2 {
@@ -1945,9 +2134,13 @@ onMounted(async () => {
   right: v-bind(rightLeft);
   width: v-bind(rightWidth);
   height: v-bind(rightHeight);
-  transform: translate3d(v-bind(backRotOffset),
+  transform: translate3d(
+      v-bind(backRotOffset),
       v-bind(bottomRotOffset),
-      -25vmin) rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDeg)) translate3d(v-bind(frontRotOffset), v-bind(topRotOffset), 25vmin);
+      -25vmin
+    )
+    rotateY(v-bind(yRotDegMinus)) rotateX(v-bind(xRotDeg))
+    translate3d(v-bind(frontRotOffset), v-bind(topRotOffset), 25vmin);
 }
 
 .left2 {
@@ -1960,7 +2153,7 @@ onMounted(async () => {
 <style lang="scss">
 html,
 body,
-body> :first-child {
+body > :first-child {
   height: 100%;
   background-color: #555;
 }
