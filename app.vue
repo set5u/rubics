@@ -299,6 +299,7 @@ class Cube {
     console.log(this);
   }
   rotateAll(axis: 0 | 1 | 2, amount: 1 | 2 | 3) {
+    console.log("all", axis, amount)
     let vecMap: [number, number, number, number, number, number] = [
       0, 0, 0, 0, 0, 0,
     ];
@@ -328,7 +329,7 @@ class Cube {
             f2.rotInternal = ((f2.rotInternal + 1) % 4) as 0 | 1 | 2 | 3;
             f3.rotInternal = ((f3.rotInternal + 1) % 4) as 0 | 1 | 2 | 3;
             f4.rotInternal = ((f4.rotInternal + 1) % 4) as 0 | 1 | 2 | 3;
-            vecMap = [0, 2, 4, 3, 5, 1];
+            vecMap = [0, 5, 1, 3, 2, 4];
             break;
           case 2:
             this.bottom = f1;
@@ -348,7 +349,7 @@ class Cube {
             f2.rotInternal = ((f2.rotInternal + 3) % 4) as 0 | 1 | 2 | 3;
             f3.rotInternal = ((f3.rotInternal + 3) % 4) as 0 | 1 | 2 | 3;
             f4.rotInternal = ((f4.rotInternal + 3) % 4) as 0 | 1 | 2 | 3;
-            vecMap = [0, 5, 1, 3, 2, 4];
+            vecMap = [0, 2, 4, 3, 5, 1];
         }
       },
       () => {
@@ -369,7 +370,7 @@ class Cube {
             this.back = f2;
             this.right = f3;
             this.front = f4;
-            vecMap = [5, 1, 0, 2, 4, 3];
+            vecMap = [2, 1, 3, 5, 4, 0];
             break;
           case 2:
             this.back = f1;
@@ -383,7 +384,7 @@ class Cube {
             this.front = f2;
             this.left = f3;
             this.back = f4;
-            vecMap = [2, 1, 3, 5, 4, 0];
+            vecMap = [5, 1, 0, 2, 4, 3];
         }
       },
       () => {
@@ -409,7 +410,7 @@ class Cube {
             this.top = f4;
             f1.rotInternal = ((f1.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
             f2.rotInternal = ((f2.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
-            vecMap = [1, 3, 2, 4, 0, 5];
+            vecMap = [4, 0, 2, 1, 3, 5];
             break;
           case 2:
             this.bottom = f1;
@@ -427,7 +428,7 @@ class Cube {
             this.bottom = f4;
             f2.rotInternal = ((f2.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
             f3.rotInternal = ((f3.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
-            vecMap = [4, 0, 2, 1, 3, 5];
+            vecMap = [1, 3, 2, 4, 0, 5];
         }
       },
     ][axis]();
@@ -436,9 +437,12 @@ class Cube {
   }
   async rotate(axis: 0 | 1 | 2, start: number, end: number, amount: 1 | 2 | 3) {
     let rotator: Ref<number | undefined> = ref(undefined);
+    const oaxis = axis
+    const ostart = start < 0 ? this.size + start : start
+    const oend = end < 0 ? this.size + end : end
+    const oamount = amount
     const naxis = axisMap[this.frontDir][this.topDir]![axis];
     const inv = invMap[this.frontDir][this.topDir]![axis];
-    console.log(axis, naxis, inv, this.frontDir, this.topDir);
     axis = naxis as 0 | 1 | 2;
     if (inv) {
       const os = start
@@ -457,11 +461,11 @@ class Cube {
       return;
     }
     if (end - start > this.size / 2) {
+      ostart !== 0 &&
+        (await this.rotate(oaxis, 0, ostart - 1, 4 - oamount as 1 | 2 | 3));
+      oend !== this.size - 1 &&
+        (await this.rotate(oaxis, oend + 1, -1, 4 - oamount as 1 | 2 | 3));
       this.rotateAll(axis, amount);
-      start !== 0 &&
-        (await this.rotate(axis, 0, start - 1, (4 - amount) as 1 | 2 | 3));
-      end !== this.size - 1 &&
-        (await this.rotate(axis, end + 1, -1, (4 - amount) as 1 | 2 | 3));
       return;
     }
     await new Promise<void>((resolve) => {
@@ -1802,9 +1806,9 @@ const backSplit2 = ref<HTMLCanvasElement>();
 const leftSplit0 = ref<HTMLCanvasElement>();
 const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
-const animationSpeed = ref(4);
+const animationSpeed = ref(10);
 onMounted(async () => {
-  const size = 6;
+  const size = 7;
   const cube = new Cube(
     [
       front.value!,
@@ -1859,8 +1863,13 @@ onMounted(async () => {
     //   const amount = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
     //   await cube.rotate(axis, start, end, amount);
     // }
-    cube.rotate(0, 0, -1, 1)
-    cube.rotate(1, 0, -1, 1)
+    console.log(cube.top.n)
+    await cube.rotate(0, 1, -2, 1)
+    console.log(cube.top.n)
+    await cube.rotate(1, 1, -2, 1)
+    console.log(cube.top.n)
+    await cube.rotate(2, 1, -2, 1)
+    console.log(cube.top.n)
     // const solver = new Solver(cube);
     // await solver.solve();
     // await new Promise<void>((resolve) => {
