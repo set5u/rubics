@@ -328,7 +328,7 @@ class Cube {
             f2.rotInternal = ((f2.rotInternal + 1) % 4) as 0 | 1 | 2 | 3;
             f3.rotInternal = ((f3.rotInternal + 1) % 4) as 0 | 1 | 2 | 3;
             f4.rotInternal = ((f4.rotInternal + 1) % 4) as 0 | 1 | 2 | 3;
-            vecMap = [0, 5, 1, 3, 2, 4];
+            vecMap = [0, 2, 4, 3, 5, 1];
             break;
           case 2:
             this.bottom = f1;
@@ -348,7 +348,7 @@ class Cube {
             f2.rotInternal = ((f2.rotInternal + 3) % 4) as 0 | 1 | 2 | 3;
             f3.rotInternal = ((f3.rotInternal + 3) % 4) as 0 | 1 | 2 | 3;
             f4.rotInternal = ((f4.rotInternal + 3) % 4) as 0 | 1 | 2 | 3;
-            vecMap = [0, 2, 4, 3, 5, 1];
+            vecMap = [0, 5, 1, 3, 2, 4];
         }
       },
       () => {
@@ -369,7 +369,7 @@ class Cube {
             this.back = f2;
             this.right = f3;
             this.front = f4;
-            vecMap = [2, 1, 3, 5, 4, 0];
+            vecMap = [5, 1, 0, 2, 4, 3];
             break;
           case 2:
             this.back = f1;
@@ -383,7 +383,7 @@ class Cube {
             this.front = f2;
             this.left = f3;
             this.back = f4;
-            vecMap = [5, 1, 0, 2, 4, 3];
+            vecMap = [2, 1, 3, 5, 4, 0];
         }
       },
       () => {
@@ -409,7 +409,7 @@ class Cube {
             this.top = f4;
             f1.rotInternal = ((f1.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
             f2.rotInternal = ((f2.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
-            vecMap = [4, 0, 2, 1, 3, 5];
+            vecMap = [1, 3, 2, 4, 0, 5];
             break;
           case 2:
             this.bottom = f1;
@@ -427,7 +427,7 @@ class Cube {
             this.bottom = f4;
             f2.rotInternal = ((f2.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
             f3.rotInternal = ((f3.rotInternal + 2) % 4) as 0 | 1 | 2 | 3;
-            vecMap = [1, 3, 2, 4, 0, 5];
+            vecMap = [4, 0, 2, 1, 3, 5];
         }
       },
     ][axis]();
@@ -1852,21 +1852,20 @@ onMounted(async () => {
     cube.animationSpeed = 2 ** animationSpeed.value;
   });
   while (true) {
-    for (let i = 0; i < size * 4; i++) {
-      const axis = Math.floor(Math.random() * 3) as 0 | 1 | 2;
-      const start = Math.floor(Math.random() * size);
-      const end = Math.floor(Math.random() * (size - start - 1)) + start;
-      const amount = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
-      await cube.rotate(axis, start, end, amount);
-    }
-    // while (true) {
-    //   await cube.rotate(0, 1, 1, 1)
+    // for (let i = 0; i < size * 4; i++) {
+    //   const axis = Math.floor(Math.random() * 3) as 0 | 1 | 2;
+    //   const start = Math.floor(Math.random() * size);
+    //   const end = Math.floor(Math.random() * (size - start - 1)) + start;
+    //   const amount = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
+    //   await cube.rotate(axis, start, end, amount);
     // }
-    const solver = new Solver(cube);
-    await solver.solve();
-    await new Promise<void>((resolve) => {
-      setTimeout(() => resolve(), 3000);
-    });
+    cube.rotate(0, 0, -1, 1)
+    cube.rotate(1, 0, -1, 1)
+    // const solver = new Solver(cube);
+    // await solver.solve();
+    // await new Promise<void>((resolve) => {
+    //   setTimeout(() => resolve(), 3000);
+    // });
     break;
   }
 });
