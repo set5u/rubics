@@ -291,6 +291,8 @@ const rotMap = [
   [0, , 1, 2, , 3,],
   [1, 0, , 3, 2, ,],
 ]
+let needsRender = false
+let awaiting = false
 class Cube {
   front: Face;
   right: Face;
@@ -379,12 +381,6 @@ class Cube {
     this.back = this.backInternal;
     this.top = this.topInternal;
     this.bottom = this.bottomInternal;
-    this.frontInternal.n = "front";
-    this.rightInternal.n = "right";
-    this.leftInternal.n = "left";
-    this.backInternal.n = "back";
-    this.topInternal.n = "top";
-    this.bottomInternal.n = "bottom";
   }
   updateFace() {
     const axis = axisMap[this.frontDir][this.topDir]!
@@ -494,57 +490,68 @@ class Cube {
         (await this.rotate(oaxis, oend + 1, -1, (4 - oamount) as 1 | 2 | 3));
       return;
     }
-    await new Promise<void>((resolve) => {
-      const offset0 = ((end + 1) / this.size) * 2 - 1;
-      const offset1 = (start / this.size) * -2 + 1;
-      this.animParams.rotAxis.value = (axis + 1) as 1 | 2 | 3;
-      switch (axis) {
-        case 0:
-          this.animParams.x0Offset.value = offset0;
-          this.animParams.x1Offset.value = offset1;
-          this.frontInternal.render(1, 1, 0);
-          this.rightInternal.render(offset0, offset1, 0, true);
-          this.leftInternal.render(offset0, offset1, 0);
-          this.backInternal.render(1, 1, 0);
-          this.topInternal.render(offset0, offset1, 1);
-          this.bottomInternal.render(offset0, offset1, 1, true);
-          rotator = this.animParams.xRot;
-          break;
-        case 1:
-          this.animParams.y0Offset.value = offset0;
-          this.animParams.y1Offset.value = offset1;
-          this.frontInternal.render(offset1, offset0, 1);
-          this.rightInternal.render(offset1, offset0, 1);
-          this.leftInternal.render(offset1, offset0, 1);
-          this.backInternal.render(offset1, offset0, 1);
-          this.topInternal.render(1, 1, 0);
-          this.bottomInternal.render(1, 1, 0);
-          rotator = this.animParams.yRot;
-          break;
-        case 2:
-          this.animParams.z0Offset.value = offset0;
-          this.animParams.z1Offset.value = offset1;
-          this.frontInternal.render(offset1, offset0, 0, true);
-          this.rightInternal.render(1, 1, 0);
-          this.leftInternal.render(1, 1, 0);
-          this.backInternal.render(offset1, offset0, 0);
-          this.topInternal.render(offset1, offset0, 0, true);
-          this.bottomInternal.render(offset1, offset0, 0, true);
-          rotator = this.animParams.zRot;
-      }
-      let startTime = Date.now();
-      const animTime = amount === 2 ? 2 : 1;
-      const frame = () => {
-        rotator.value =
-          ((Date.now() - startTime) / this.animationSpeed) *
-          90 *
-          (amount === 3 ? -1 : 1);
-        startTime + this.animationSpeed * animTime > Date.now()
-          ? requestAnimationFrame(frame)
-          : resolve();
-      };
-      frame();
-    });
+    if (this.animationSpeed) {
+      await new Promise<void>((resolve) => {
+        const offset0 = ((end + 1) / this.size) * 2 - 1;
+        const offset1 = (start / this.size) * -2 + 1;
+        this.animParams.rotAxis.value = (axis + 1) as 1 | 2 | 3;
+        switch (axis) {
+          case 0:
+            this.animParams.x0Offset.value = offset0;
+            this.animParams.x1Offset.value = offset1;
+            this.frontInternal.render(1, 1, 0);
+            this.rightInternal.render(offset0, offset1, 0, true);
+            this.leftInternal.render(offset0, offset1, 0);
+            this.backInternal.render(1, 1, 0);
+            this.topInternal.render(offset0, offset1, 1);
+            this.bottomInternal.render(offset0, offset1, 1, true);
+            rotator = this.animParams.xRot;
+            break;
+          case 1:
+            this.animParams.y0Offset.value = offset0;
+            this.animParams.y1Offset.value = offset1;
+            this.frontInternal.render(offset1, offset0, 1);
+            this.rightInternal.render(offset1, offset0, 1);
+            this.leftInternal.render(offset1, offset0, 1);
+            this.backInternal.render(offset1, offset0, 1);
+            this.topInternal.render(1, 1, 0);
+            this.bottomInternal.render(1, 1, 0);
+            rotator = this.animParams.yRot;
+            break;
+          case 2:
+            this.animParams.z0Offset.value = offset0;
+            this.animParams.z1Offset.value = offset1;
+            this.frontInternal.render(offset1, offset0, 0, true);
+            this.rightInternal.render(1, 1, 0);
+            this.leftInternal.render(1, 1, 0);
+            this.backInternal.render(offset1, offset0, 0);
+            this.topInternal.render(offset1, offset0, 0, true);
+            this.bottomInternal.render(offset1, offset0, 0, true);
+            rotator = this.animParams.zRot;
+        }
+        let startTime = Date.now();
+        const animTime = amount === 2 ? 2 : 1;
+        const frame = () => {
+          rotator.value =
+            ((Date.now() - startTime) / this.animationSpeed) *
+            90 *
+            (amount === 3 ? -1 : 1);
+          startTime + this.animationSpeed * animTime > Date.now()
+            ? requestAnimationFrame(frame)
+            : resolve();
+        };
+        frame();
+      });
+    } else {
+      await new Promise<void>((resolve) => {
+        awaiting || requestAnimationFrame(() => needsRender = true)
+        awaiting = true
+        needsRender ? requestAnimationFrame(() => (resolve(), awaiting = false, needsRender = false)) : resolve()
+      })
+    }
+    await new Promise<void>((resolve) => setTimeout(() => {
+      resolve()
+    }))
     rotator.value && (rotator.value = 0);
     this.animParams.x0Offset.value = 1;
     this.animParams.x1Offset.value = 1;
@@ -1876,7 +1883,7 @@ onMounted(async () => {
     size,
   );
   watchEffect(() => {
-    cube.animationSpeed = 2 ** animationSpeed.value;
+    cube.animationSpeed = 2 ** animationSpeed.value - 1;
   });
   while (true) {
     for (let i = 0; i < size * 4; i++) {
