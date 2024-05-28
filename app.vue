@@ -61,6 +61,9 @@
   .fixed.top-0.right-0
     input(v-model="rotY", type="range", min="-180", max="180")
     input(v-model="rotX", type="range", min="-90", max="90")
+  .fixed.bottom-9.right-0
+    input.rounded.mx-1(v-model="sizeInput" type="number")
+    button.rounded.mx-1.border.border-white.text-white(@click="confirmSize") CONFIRM
 </template>
 <script setup lang="ts">
 const { lock, unlock, element } = usePointerLock();
@@ -72,6 +75,18 @@ watch([x, y], ([x, y]) => {
   rotY.value += x / 2;
   rotX.value -= y / 2;
 });
+const initialSize = (() => {
+  try {
+    return parseInt(location.hash.substring(1))
+  } catch (e) {
+    return 0
+  }
+})()
+const sizeInput = ref(initialSize > 2 ? initialSize : 64)
+const confirmSize = () => {
+  location.hash = String(sizeInput.value)
+  location.reload()
+}
 enum Color {
   R = "R",
   G = "G",
@@ -107,6 +122,8 @@ class Face {
     this.ctx.fillStyle = i2color[initialColor];
     this.ctx.fillRect(0, 0, canvas.width, canvas.height);
     this.ocanvas = document.createElement("canvas");
+    this.ocanvas.width = canvas.width
+    this.ocanvas.height = canvas.height
     this.octx = this.ocanvas.getContext("2d")!;
     this.render(1, 1, 0);
   }
@@ -1838,7 +1855,8 @@ const leftSplit1 = ref<HTMLCanvasElement>();
 const leftSplit2 = ref<HTMLCanvasElement>();
 const animationSpeed = ref(5);
 onMounted(async () => {
-  const size = 64;
+  const size = sizeInput.value;
+  console.log(size)
   const cube = new Cube(
     [
       front.value!,
@@ -1886,19 +1904,17 @@ onMounted(async () => {
     cube.animationSpeed = 2 ** animationSpeed.value - 1;
   });
   while (true) {
-    for (let i = 0; i < size * 4; i++) {
+    for (let i = 0; i < size * 9; i++) {
       const axis = Math.floor(Math.random() * 3) as 0 | 1 | 2;
-      const start = Math.floor(Math.random() * size);
-      const end = Math.floor(Math.random() * (size - start - 1)) + start;
+      const i = Math.floor(Math.random() * size);
       const amount = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
-      await cube.rotate(axis, start, end, amount);
+      await cube.rotate(axis, i, i, amount);
     }
     const solver = new Solver(cube);
     await solver.solve();
     await new Promise<void>((resolve) => {
       setTimeout(() => resolve(), 3000);
     });
-    break;
   }
 });
 </script>
